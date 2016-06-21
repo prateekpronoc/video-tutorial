@@ -84,6 +84,12 @@ REST_ROUTER.prototype.handleRoutes= function(router,connection,md5,jwt) {
         });
     });
     
+    router.post("/course/unsubscribed",function(req,res){
+        queryHelper.getAllCourses("unsubscribed", req.body.userId, connection, function(result) {
+            res.json(result);
+        });
+    });
+    
     router.post("/unit",function(req,res){
         queryHelper.addUpdateUnitToCourse(req.body, connection, function(result) {
             res.json(result);

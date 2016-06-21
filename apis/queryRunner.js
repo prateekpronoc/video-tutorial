@@ -144,6 +144,9 @@ var self={
         } else if(type == "subscribed"){
             query = "select * from ?? where ?? IN (select ?? from course_subscription where ?? = ?)";
             queryValue = ["courses", "id", "course_id", "user_id", id];
+        } else if(type == "unsubscribed"){
+            query = "select * from ?? where ?? NOT IN (select ?? from course_subscription where ?? = ?)";
+            queryValue = ["courses", "id", "course_id", "user_id", id];
         }
         query = mysql.format(query, queryValue);
         console.log(query);
