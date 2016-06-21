@@ -60,6 +60,36 @@ REST_ROUTER.prototype.handleRoutes= function(router,connection,md5,jwt) {
         });
     });
     
+    router.get("/course/all",function(req,res){
+        queryHelper.getAllCourses("all", 0, connection, function(result) {
+            res.json(result);
+        });
+    });
+    
+    router.get("/course/allRunning",function(req,res){
+        queryHelper.getAllCourses("allRunning", 0, connection, function(result) {
+            res.json(result);
+        });
+    });
+    
+    router.get("/course/allSeasional",function(req,res){
+        queryHelper.getAllCourses("allSeasional", 0, connection, function(result) {
+            res.json(result);
+        });
+    });
+    
+    router.post("/course/subscribed",function(req,res){
+        queryHelper.getAllCourses("subscribed", req.body.userId, connection, function(result) {
+            res.json(result);
+        });
+    });
+    
+    router.post("/unit",function(req,res){
+        queryHelper.addUpdateUnitToCourse(req.body, connection, function(result) {
+            res.json(result);
+        });
+    });
+    
 //    router.post("/course/addUsers",function(req,res){
 //        queryHelper.addInstructorToCourse(req.body, connection, function(result) {
 //            res.json(result);

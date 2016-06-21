@@ -130,40 +130,70 @@ var self={
             });
         }
     },
+    getAllCourses: function(type, id, connection, callback){
+        var query, queryValue;
+        if(type == "all"){
+            query = "SELECT * from ??";
+            queryValue = ["courses"];
+        } else if(type == "allRunning"){
+            query = "SELECT * from ?? where validFrom IS NULL and validTo IS NULL";
+            queryValue = ["courses"];
+        } else if(type == 'allSeasional'){
+            query = "SELECT * from ?? where validFrom IS NOT NULL and validTo IS NOT NULL";
+            queryValue = ["courses"];
+        } else if(type == "subscribed"){
+            query = "select * from ?? where ?? IN (select ?? from course_subscription where ?? = ?)";
+            queryValue = ["courses", "id", "course_id", "user_id", id];
+        }
+        query = mysql.format(query, queryValue);
+        console.log(query);
+        connection.query(query, function(err, rows){
+            if(err){
+                callback({"Error": true, "Message": err});
+            } else {
+                callback({"Error": false, "Message": "Success", "courses": rows });
+            }
+        });
+    },
     addUpdateUnitToCourse: function(request, connection, callback){
         if(request.courseId){
             var query = query, queryValues;
             connection.beginTransaction(function(err) {
                 if (err) {
-                    callback(err);
+                    callback({"Error": true, "Message": err});
                 }
+                query = "DELETE FROM ?? where ?? = ?";
+                queryValues = ["units", "course_id", request.courseId];
+                query = mysql.format(query, queryValues);
+                console.log(query);
                 connection.query(query, function(err, rows) {
                     if (err) {
                         return connection.rollback(function() {
-                            callback(err);
+                            callback({"Error": true, "Message": err});
                         });
                     }
-                    query = "INSERT INTO ??(??, ??) values ?";
-                    queryValues = ["courses_instructor", "course_id", "user_id"];
+                    query = "INSERT INTO ??(??, ??, ??, ??, ??) values ?";
+                    queryValues = ["units", "course_id", "name", "description", "video", "air_date"];
                     var values = [];
-                    for(var i = 0; i < request.usersList.length; i++){
-                        values.push([courseId, request.usersList[i]]);
+                    for(var i = 0; i < request.unitsList.length; i++){
+                        values.push([request.courseId, request.unitsList[i].name, request.unitsList[i].description, request.unitsList[i].video, request.unitsList[i].airDate]);
                     }
                     queryValues.push(values);
                     query = mysql.format(query, queryValues);
+                    console.log(query);
                     connection.query(query, function(err, rows) {
                         if (err) {
                             return connection.rollback(function() {
-                                callback(err);
+                                callback({"Error": true, "Message": err});
                             });
                         }
                         connection.commit(function(err) {
                             if (err) {
                                 return connection.rollback(function() {
-                                    callback(err);
+                                    callback({"Error": true, "Message": err});
                                 });
                             }
-                            callback(err, rows);
+                            callback({"Error": false, "Message": "Unit Added"});
                         });
                     });
                 });
