@@ -129,6 +129,46 @@ var self={
                 }
             });
         }
+    },
+    addUpdateUnitToCourse: function(request, connection, callback){
+        if(request.courseId){
+            var query = query, queryValues;
+            connection.beginTransaction(function(err) {
+                if (err) {
+                    callback(err);
+                }
+                connection.query(query, function(err, rows) {
+                    if (err) {
+                        return connection.rollback(function() {
+                            callback(err);
+                        });
+                    }
+                    query = "INSERT INTO ??(??, ??) values ?";
+                    queryValues = ["courses_instructor", "course_id", "user_id"];
+                    var values = [];
+                    for(var i = 0; i < request.usersList.length; i++){
+                        values.push([courseId, request.usersList[i]]);
+                    }
+                    queryValues.push(values);
+                    query = mysql.format(query, queryValues);
+                    connection.query(query, function(err, rows) {
+                        if (err) {
+                            return connection.rollback(function() {
+                                callback(err);
+                            });
+                        }
+                        connection.commit(function(err) {
+                            if (err) {
+                                return connection.rollback(function() {
+                                    callback(err);
+                                });
+                            }
+                            callback(err, rows);
+                        });
+                    });
+                });
+            });
+        }
     }
 //    addInstructorToCourse: function(request, connection, callback){
 //        if(request.courseId && request.usersList && request.usersList.length > 0){
