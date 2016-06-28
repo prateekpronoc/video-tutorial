@@ -1,0 +1,45 @@
+<div class="container-fluid" ng-cloak>
+    <form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.cname">Course Name</label>
+                    <input type="text" class="form-control" id="course.cname" placeholder="Course Name" ng-model="vm.course.name" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.description">Description</label>
+                    <textarea class="form-control" id="course.description" placeholder="Description" ng-model="vm.course.description"></textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.duration">Duration</label>
+                    <input type="text" class="form-control" id="course.duration" placeholder="Duration" ng-model="vm.course.duration" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.subscriptionAmt">Subscription Fee</label>
+                    <input type="text" class="form-control" id="course.subscriptionAmt" placeholder="Subscription Fee" ng-model="vm.course.subscriptionAmt" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.validFrom">Valid From</label>
+                    <input type="text" class="form-control" id="course.validFrom" placeholder="Valid From" ng-model="vm.course.validFrom" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.validTo">Valid Till</label>
+                    <input type="text" class="form-control" id="course.validTo" placeholder="Valid Till" ng-model="vm.course.validTo" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <button type="submit" class="btn btn-default" ng-click="vm.updateProfile()">Update</button>
+            </div>
+        </div>
+    </form>
+</div>

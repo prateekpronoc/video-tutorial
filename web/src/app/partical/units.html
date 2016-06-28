@@ -1,0 +1,11 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row">
+        <div class="col-md-4" ng-repeat="unit in vm.units">
+            <div class="panel panel-primary" ng-click="vm.getLessons(unit.id)" ui-sref="main.lessons">
+                <div class="panel-heading" ng-bind="unit.name"></div>
+                <div class="panel-body" ng-bind="unit.description" style="height:150px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

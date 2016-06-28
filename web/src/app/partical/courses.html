@@ -1,0 +1,45 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">
+                    <button type="button" class="btn btn-default pull-right visible-xs-block visible-md-block" ui-sref="main.createCourse">
+                        <i class="fa fa-plus" aria-hidden="true"></i> New Course
+                    </button>
+                    <button type="button" class="btn btn-default pull-right visible-lg-block" ui-sref="main.createCourse">
+                        <i title="Add Course" class="fa fa-plus pull-right" aria-hidden="true"></i>
+                    </button>
+                    <div class="clearfix"></div>
+                </div>
+                <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;">
+                    <!-- <caption>
+                        
+                        
+                    </caption> -->
+                    <thead>
+                        <tr class="success">
+                            <th>#</th>
+                            <th>Course Name</th>
+                            <th>Durations</th>
+                            <th>Instructors</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="course in vm.courses">
+                            <th scope="row" ng-bind="$index + 1"></th>
+                            <td ng-bind="course.name"></td>
+                            <td ng-bind="course.duration"></td>
+                            <td ng-bind="course.instructors"></td>
+                            <td>
+                                <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.editCourse(course.id)" style="vertical-align:-4px;"></i>
+                                <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteCourse(course.id)"></i>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

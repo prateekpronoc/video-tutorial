@@ -1,0 +1,79 @@
+<div class="container-fluid" ng-cloak>
+    <!-- header nav starts -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" ng-click="vm.isCollapsed = !vm.isCollapsed" aria-expanded="true">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">
+                    <img src="/assets/images/forumias-small.png" style="margin-top:-11px;" />
+                </a>
+            </div>
+            <div class="navbar-collapse collapse in" uib-collapse="vm.isCollapsed" aria-expanded="true" style="margin-right:25px;">
+                <!-- <div class="collapse navbar-collapse" uib-dropdown-menu role="menu" aria-labelledby="single-button"> -->
+                <span class="nav navbar-nav navbar-right" uib-dropdown>
+                    <img src="/assets/images/avatar.png" style="width:50px;" class="img-responsive center-block img-circle" id="simple-dropdown" uib-dropdown-toggle>
+                    <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
+                        <li ng-repeat="choice in items">
+                            <li role="menuitem" ui-sref="main.profile"><a href="#">Edit Profile</a></li>
+                            <li class="divider"></li>
+                            <li role="menuitem"><a href="#">Sign Out</a></li>
+                        </li>
+                    </ul>
+                </span>
+                <form class="navbar-form navbar-right" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search for..." />
+                        <span class="input-group-btn">
+                          <button class="btn btn-default" type="button">Go!</button>
+                        </span>
+                    </div>
+                </form>
+                <!-- project menu -->
+                <ul class="nav navbar-nav navbar-left">
+                    <li ui-sref="main.libary" ui-sref-active="active" ng-if="vm.config.tabs.library">
+                        <a href="javascript:void(0);" ng-click="vm.getAllCourses();">
+                            <i class="fa fa-database fa-fw" aria-hidden="true"></i> Library
+                        </a>
+                    </li>
+                    <li ui-sref="main.myCourses" ui-sref-active="active" ng-if="vm.config.tabs.myCourses">
+                        <a href="javascript:void(0);" ng-click="vm.getMyCourses()">
+                            <i class="fa fa-clone fa-fw" aria-hidden="true"></i> My Courses
+                        </a>
+                    </li>
+                    <li ui-sref="main.courses" ui-sref-active="active" ng-if="vm.config.tabs.allCourses">
+                        <a href="javascript:void(0);" ng-click="vm.getAllCourses();">
+                            <i class="fa fa-database fa-fw" aria-hidden="true"></i> Courses
+                        </a>
+                    </li>
+                    <li ui-sref="main.lessons" ui-sref-active="active" ng-if="vm.config.tabs.allLessons">
+                        <a href="javascript:void(0);" ng-click="vm.getAllLessons()">
+                            <i class="fa fa-clone fa-fw" aria-hidden="true"></i> Lessons
+                        </a>
+                    </li>
+                    <li ui-sref="main.instructors" ui-sref-active="active" ng-if="vm.config.tabs.instructor">
+                        <a href="javascript:void(0);" ng-click="vm.getUsers('instructor')">
+                            <i class="fa fa-user fa-fw" aria-hidden="true"></i> Instructors
+                        </a>
+                    </li>
+                    <li ui-sref="main.students" ui-sref-active="active" ng-if="vm.config.tabs.students">
+                        <a href="javascript:void(0);" ng-click="vm.getUsers('student')">
+                            <i class="fa fa-users fa-fw" aria-hidden="true"></i> Students
+                        </a>
+                    </li>
+                </ul>
+                <!-- project menu -->
+            </div>
+        </div>
+    </nav>
+    <!-- header nav ends -->
+    <div class="row" style="margin-top:65px;">
+        <div class="col-md-12">
+            <div ui-view></div>
+        </div>
+    </div>
+</div>

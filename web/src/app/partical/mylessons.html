@@ -1,0 +1,32 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row" style="height:80%;overflow-y:auto;">
+        <div class="col-md-3">
+            <uib-accordion close-others="true">
+                <uib-accordion-group ng-repeat="unit in vm.units" heading="{{unit.name}}" is-open="$first">
+                    <uib-tabset active="activePill" vertical="true" type="pills">
+                        <uib-tab heading="{{lesson}}" ng-repeat="lesson in unit.lessonsList" ng-click="vm.lesson = lesson"></uib-tab>
+                    </uib-tabset>
+                </uib-accordion-group>
+            </uib-accordion>
+        </div>
+        <div class="col-md-9" style="overflow-y:auto;">
+            <div class="page-header">
+                <h1 ng-bind="vm.lesson.name"></h1>
+            </div>
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe class="embed-responsive-item" src="//www.youtube.com/embed/zpOULjyy-n8?rel=0" allowfullscreen=""></iframe>
+            </div>
+            <div class="well well-sm">
+                <div>Related files</div>
+            </div>
+            <div>
+                <textarea rows="3" style="width:80%;"></textarea>
+            </div>
+        </div>
+        <!-- <div class="col-md-3" style="overflow-y:auto;">
+            <uib-tabset active="activePill" vertical="true" type="pills">
+                <uib-tab index="{{$index}}" heading="{{lesson.name}}" ng-repeat="lesson in vm.lessons" ng-click="vm.lesson = lesson"></uib-tab>
+            </uib-tabset>
+        </div> -->
+    </div>
+</div>

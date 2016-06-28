@@ -1,0 +1,41 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">
+                    <button type="button" class="btn btn-default pull-right visible-xs-block visible-md-block" ui-sref="main.createCourse">
+                        <i class="fa fa-plus" aria-hidden="true"></i> New Lesson
+                    </button>
+                    <button type="button" class="btn btn-default pull-right visible-lg-block" ui-sref="main.createCourse">
+                        <i title="Add Lesson" class="fa fa-plus pull-right" aria-hidden="true"></i>
+                    </button>
+                    <div class="clearfix"></div>
+                </div>
+                <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;">
+                    <thead>
+                        <tr class="success">
+                            <th>#</th>
+                            <th>Lesson Name</th>
+                            <th>Description</th>
+                            <th>Files</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="lessons in vm.lessons">
+                            <th scope="row" ng-bind="$index + 1"></th>
+                            <td ng-bind="lessons.name"></td>
+                            <td ng-bind="lessons.description"></td>
+                            <td ng-bind="lessons.files"></td>
+                            <td>
+                                <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.editLesson(lessons.id)" style="vertical-align:-4px;"></i>
+                                <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteLesson(lessons.id)"></i>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

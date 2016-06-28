@@ -1,0 +1,47 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="center-block" style="height:150px; width:150px;">
+                        <img src="/assets/images/avatar.png" style="width:150px;" class="img-rounded center-block">
+                    </div><br />
+                    <input class="btn btn-default center-block" ngf-change="vm.profileImgUpload($file)" type="button" value="Change Photo" ngf-select ng-model="vm.file" name="file" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="20MB" />
+
+                    <input type="file" name="file" ng-model="vm.profileImg" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <form>
+                <div class="form-group">
+                    <label for="profile.fname">First Name</label>
+                    <input type="text" class="form-control" id="profile.name" placeholder="First Name" ng-model="vm.userInfo.firstName" />
+                </div>
+                <div class="form-group">
+                    <label for="profile.lname">Last Name</label>
+                    <input type="text" class="form-control" id="profile.lname" placeholder="Last Name" ng-model="vm.userInfo.lastName" />
+                </div>
+                <div class="form-group">
+                    <label for="profile.email">Email</label>
+                    <input type="email" class="form-control" id="profile.email" placeholder="Email" ng-model="vm.userInfo.email" />
+                </div>
+                <div class="form-group">
+                    <label for="profile.phone">Phone</label>
+                    <input type="text" class="form-control" id="profile.phone" placeholder="Phone" ng-model="vm.userInfo.phone" />
+                </div>
+                <div class="form-group">
+                    <label for="profile.about">About you</label>
+                    <textarea class="form-control" id="profile.about" rows="5" placeholder="About you" ng-model="vm.userInfo.about">
+                    </textarea>
+                </div>
+                <div class="form-group">
+                    <label for="profile.billingAddress">Billing Address</label>
+                    <textarea class="form-control" id="profile.billingAddress" rows="5" placeholder="Address" ng-model="vm.userInfo.billingAddress">
+                    </textarea>
+                </div>
+                <button type="submit" class="btn btn-default" ng-click="vm.updateProfile()">Update</button>
+            </form>
+        </div>
+    </div>
+</div>
