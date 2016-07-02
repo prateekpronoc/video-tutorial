@@ -4,11 +4,10 @@
             <div class="panel panel-default">
                 <!-- Default panel contents -->
                 <div class="panel-heading">
-                    <button type="button" class="btn btn-default pull-right visible-xs-block visible-md-block" ui-sref="main.createCourse">
+                    <button type="button" class="btn btn-default pull-right visible-xs-block visible-md-block" ng-click="vm.editLesson('insert')">
                         <i class="fa fa-plus" aria-hidden="true"></i> New Lesson
                     </button>
-                    <button type="button" class="btn btn-default pull-right visible-lg-block" ui-sref="main.createCourse">
-                        <i title="Add Lesson" class="fa fa-plus pull-right" aria-hidden="true"></i>
+                    <button type="button" class="btn btn-default pull-right visible-lg-block" ng-click="vm.editLesson('insert')"><i title="Add Lesson" class="fa fa-plus" aria-hidden="true"></i>
                     </button>
                     <div class="clearfix"></div>
                 </div>
@@ -23,14 +22,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="lessons in vm.lessons">
+                        <tr ng-repeat="lesson in vm.lessons">
                             <th scope="row" ng-bind="$index + 1"></th>
-                            <td ng-bind="lessons.name"></td>
-                            <td ng-bind="lessons.description"></td>
-                            <td ng-bind="lessons.files"></td>
+                            <td ng-bind="lesson.name"></td>
+                            <td ng-bind="lesson.description"></td>
                             <td>
-                                <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.editLesson(lessons.id)" style="vertical-align:-4px;"></i>
-                                <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteLesson(lessons.id)"></i>
+                                <span ng-repeat="file in lesson.files">
+                                    <span ng-bind="file.file"></span><span ng-if="!$last">, </span>
+                                </span>
+                            </td>
+                            <td>
+                                <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getLessonById(lesson.id)" style="vertical-align:-4px;"></i>
+                                <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteLesson(lesson)"></i>
                             </td>
                         </tr>
                     </tbody>

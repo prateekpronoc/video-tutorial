@@ -11,15 +11,21 @@
     function CommonInfo($localStorage) {
         return {
             getInfoObj: function() {
-                return $localStorage.infoObj;
+                return angular.copy($localStorage.infoObj);
             },
             getInfo: function(item) {
-                return $localStorage.infoObj[item];
+                return angular.copy($localStorage.infoObj[item]);
             },
             setInfo: function(item, value) {
                 var obj = $localStorage.infoObj || {};
-                obj[item] = value;
+                obj[item] = angular.copy(value);
                 $localStorage.infoObj = obj;
+            },
+            reset: function() {
+                $localStorage.$reset();
+            },
+            getAppUrl: function() {
+                return 'http://localhost:3000';
             }
         };
     }
@@ -71,7 +77,9 @@
             openModal: function(templateUrl) {
                 var modalInstance = $uibModal.open({
                     animation: true,
-                    templateUrl: templateUrl
+                    templateUrl: templateUrl,
+                    bindToController: true,
+                    controllerAs: 'vm'
                 });
 
                 modalInstance.result.then(function(selectedItem) {

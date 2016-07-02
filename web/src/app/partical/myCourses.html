@@ -1,13 +1,13 @@
 <div class="container-fluid" ng-cloak>
     <div class="row">
         <div class="col-md-4" ng-repeat="course in vm.courses">
-            <div class="panel" ng-click="vm.getUnits(course.id)" ui-sref="main.myLessons" ng-style="{'border-color': course.color_code}">
+            <div class="panel" ng-style="{'border-color': course.color_code}">
                 <div class="panel-heading" ng-bind="course.name" ng-style="{'border-color': course.color_code, 'background-color': course.color_code}"></div>
                 <div class="panel-body" ng-bind="course.description" style="height:150px;"></div>
                 <div class="panel-footer container-fluid">
                 	<div class="row">
                 		<div class="col-md-12 text-right">
-                			<button type="button" class="btn btn-default btn-sm">
+                			<button type="button" class="btn btn-default btn-sm" ng-click="vm.selectCourse(course)">
                                 <i class="fa fa-play" aria-hidden="true"></i> Start Now
                             </button>
                 		</div>

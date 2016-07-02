@@ -6,7 +6,7 @@
         .controller('LoginController', LoginController);
 
     /** @ngInject */
-    function LoginController($http, $state, CommonInfo) {
+    function LoginController($http, $state, CommonInfo, growl) {
         var vm = this;
 
         vm.user = {
@@ -14,11 +14,10 @@
             password: ''
         };
         vm.newUser = {
-            firstName: '',
-            lastName: '',
+            fullName: '',
             email: '',
             password: '',
-            about: '',
+            phone: '',
         };
 
         vm.login = login;
@@ -34,11 +33,15 @@
             if (vm.user.email && vm.user.password) {
                 $http.post("/api/login", vm.user).then(
                     function(response) {
-                        if (response && response.data && response.data.user) {
-                            CommonInfo.setInfo('user', { 'userId': response.data.user, 'profileType': response.data.profileType });
-                            if(response.data.profileType == 'student')
+                        if (response && response.data && response.data.result) {
+                            if (response.data.result.profilePhoto) {
+                                response.data.result.profilePhoto = CommonInfo.getAppUrl() + response.data.result.profilePhoto;
+                            }
+                            CommonInfo.setInfo('user', response.data.result);
+                            var profileType = response.data.result.profileType;
+                            if (profileType == 'student')
                                 $state.go('main.libary');
-                            else if(response.data.profileType == 'admin')
+                            else if (profileType == 'admin')
                                 $state.go('main.courses');
                         }
                     },
@@ -50,13 +53,16 @@
         };
 
         function signup() {
-            if (vm.newUser.email && vm.newUser.email && vm.newUser.firstName) {
+            if (vm.newUser.email && vm.newUser.phone && vm.newUser.fullName) {
                 $http.post("api/user", vm.newUser).then(
                     function(response) {
-                        console.log(response.data);
+                        if (response && response.data && !response.data.Error) {
+                            growl.success('Signup successfuly');
+                            vm.newUser = {};
+                        }
                     },
                     function(response) {
-                        console.log(response.data);
+                        growl.error('Unable to signup, try after some time');
                     }
                 );
             }

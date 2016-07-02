@@ -1,3 +1,4 @@
+/*used in Library pannel as round button starts*/
 .btn-circle {
     width: 30px;
     height: 30px;
@@ -7,7 +8,9 @@
     line-height: 1.428571429;
     border-radius: 15px;
 }
+/*used in Library pannel as round button ends*/
 
+/* to align button in bottom of the div starts*/
 .bottomaligned {
     position: absolute;
     bottom: 0;
@@ -33,4 +36,11 @@
 .fixedheight {
     height: 150px;
     position: relative;
+}
+/* to align button in bottom of the div ends*/
+
+.selectedLesson {
+    color: #555;
+    text-decoration: none;
+    background-color: #f5f5f5;
 }

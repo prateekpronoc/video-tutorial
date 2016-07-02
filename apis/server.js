@@ -4,10 +4,12 @@ var bodyParser = require("body-parser");
 var md5 = require('MD5');
 var passport = require('passport');
 var jwt = require('jsonwebtoken');
-var Sequelize = require("sequelize");
+var cors = require('cors');
 var config = require('./config.js');
 var rest = require("./REST.js");
 var app = express();
+var multiparty = require('connect-multiparty'),
+    multipartyMiddleware = multiparty({ uploadDir: './public/imagesPath' });
 
 function Apis() {
     var self = this;
@@ -15,26 +17,26 @@ function Apis() {
 };
 
 Apis.prototype.connectMysql = function() {
-    var sequelize = new Sequelize('onlineCoursesdb', 'root', 'data', {
-        host: 'localhost',
-        dialect: 'mysql',
-        pool: {
-            max: 5,
-            min: 0,
-            idle: 10000
+    var self = this;
+    var pool = mysql.createPool(config.database);
+    pool.getConnection(function(err, connection) {
+        if (err) {
+            self.stop(err);
+        } else {
+            self.configureExpress(connection);
         }
     });
-    var self = this;
-    self.configureExpress(sequelize);
 }
 
-Apis.prototype.configureExpress = function(sequelize) {
+Apis.prototype.configureExpress = function(connection) {
     var self = this;
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
+    app.use(cors());
+    app.use(express.static('public'));
     var router = express.Router();
     app.use('/api', router);
-    var rest_router = new rest(router, sequelize, md5, jwt);
+    var rest_router = new rest(router, connection, md5, jwt, multipartyMiddleware);
     self.startServer();
 }
 

@@ -1,0 +1,29 @@
+<style>
+.accordion-toggle a:link, a:hover, a:visited, a:active {
+    text-decoration: none;
+}
+</style>
+<div class="container-fluid" ng-cloak>
+    <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="$close();"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" ng-bind="course.courseName"></h3>
+    </div>
+    <div class="modal-body">
+        <uib-accordion close-others="false">
+            <uib-accordion-group is-open="unit.isopen" ng-repeat="unit in course.units">
+                <uib-accordion-heading ng-click="unit.isopen = !unit.isopen">
+                    <div ng-bind="unit.name"></div>
+                </uib-accordion-heading>
+                <ul class="list-group">
+                    <li class="list-group-item" ng-repeat="lesson in unit.lessons">
+                        <h5 ng-bind="lesson.name"></h5>
+                        <p ng-bind="lesson.description"></p>
+                    </li>
+                </ul>
+            </uib-accordion-group>
+        </uib-accordion>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="$close();">OK</button>
+    </div>
+</div>

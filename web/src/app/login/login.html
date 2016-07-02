@@ -89,49 +89,47 @@
         </div>
     </div>
     <div class="row" style="margin-top:20px;">
-        <div class="col-md-4 col-md-offset-8 col-xs-12 well">
-            <uib-tabset active="activeForm">
-                <uib-tab index="0" heading="Login">
-                    <form style="margin-top:15px;">
-                        <div class="form-group">
-                            <label for="profile.email">Email or Phone number</label>
-                            <input type="text" class="form-control" id="profile.email" placeholder="Email or Phone number" ng-model="vm.user.email" />
-                        </div>
-                        <div class="form-group">
-                            <label for="profile.password">Password</label>
-                            <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" />
-                        </div>
-                        <input class="btn btn-default pull-right" type="button" ng-click="vm.login()" value="Login">
-                        <div class="clearfix"></div>
-                    </form>
-                </uib-tab>
-                <uib-tab index="1" heading="Signup">
-                    <form style="margin-top:15px;">
-                        <div class="form-group">
-                            <label for="profile.fname">First Name</label>
-                            <input type="text" class="form-control" id="profile.name" placeholder="First Name" ng-model="vm.newUser.firstName" />
-                        </div>
-                        <div class="form-group">
-                            <label for="profile.lname">Last Name</label>
-                            <input type="text" class="form-control" id="profile.lname" placeholder="Last Name" ng-model="vm.newUser.lastName" />
-                        </div>
-                        <div class="form-group">
-                            <label for="profile.email">Email</label>
-                            <input type="email" class="form-control" id="profile.email" placeholder="Email" ng-model="vm.newUser.email" />
-                        </div>
-                        <div class="form-group">
-                            <label for="profile.phone">Phone</label>
-                            <input type="text" class="form-control" id="profile.phone" placeholder="Phone" ng-model="vm.newUser.phone" />
-                        </div>
-                        <div class="form-group">
-                            <label for="profile.password">Password</label>
-                            <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.newUser.password" />
-                        </div>
-                        <input class="btn btn-default pull-right" type="button" ng-click="vm.signup()" value="Sign me Up!">
-                        <div class="clearfix"></div>
-                    </form>
-                </uib-tab>
-            </uib-tabset>
+        <div class="col-md-4 col-md-offset-8 col-xs-12 col-xs-offset-1" style="margin-right:4px;">
+            <div class=" well">
+                <uib-tabset active="activeForm">
+                    <uib-tab index="0" heading="Login">
+                        <form style="margin-top:15px;">
+                            <div class="form-group">
+                                <label for="profile.email">Email or Phone number</label>
+                                <input type="text" class="form-control" id="profile.email" placeholder="Email or Phone number" ng-model="vm.user.email" />
+                            </div>
+                            <div class="form-group">
+                                <label for="profile.password">Password</label>
+                                <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" ng-keyup="$event.keyCode == 13 && vm.login()" />
+                            </div>
+                            <input class="btn btn-default pull-right" type="button" ng-click="vm.login()" value="Login">
+                            <div class="clearfix"></div>
+                        </form>
+                    </uib-tab>
+                    <uib-tab index="1" heading="Signup">
+                        <form style="margin-top:15px;">
+                            <div class="form-group">
+                                <label for="profile.fullName">Full Name</label>
+                                <input type="text" class="form-control" id="profile.fullName" placeholder="Full Name" ng-model="vm.newUser.fullName" />
+                            </div>
+                            <div class="form-group">
+                                <label for="profile.email">Email</label>
+                                <input type="email" class="form-control" id="profile.email" placeholder="Email" ng-model="vm.newUser.email" />
+                            </div>
+                            <div class="form-group">
+                                <label for="profile.phone">Phone</label>
+                                <input type="text" class="form-control" id="profile.phone" placeholder="Phone" ng-model="vm.newUser.phone" />
+                            </div>
+                            <div class="form-group">
+                                <label for="profile.password">Password</label>
+                                <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.newUser.password" />
+                            </div>
+                            <input class="btn btn-default pull-right" type="button" ng-click="vm.signup()" value="Sign me Up!">
+                            <div class="clearfix"></div>
+                        </form>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
         </div>
     </div>
 </div>

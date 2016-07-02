@@ -1,11 +1,14 @@
 <div class="container-fluid" ng-cloak>
     <div class="modal-header">
-        <button type="button" class="close" aria-label="Close" ng-click="vm.closeModal();"><span aria-hidden="true">&times;</span></button>
-        <h3 class="modal-title">Course Demo</h3>
+        <button type="button" class="close" aria-label="Close" ng-click="$close();"><span aria-hidden="true">&times;</span></button>
+        <h3 ng-bind="course.name"></h3>
     </div>
     <div class="modal-body">
+        <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item" src="//www.youtube.com/embed/zpOULjyy-n8?rel=0" allowfullscreen=""></iframe>
+        </div>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" type="button" ng-click="vm.closeModal()">OK</button>
+        <button class="btn btn-primary" type="button" ng-click="$close();">OK</button>
     </div>
 </div>

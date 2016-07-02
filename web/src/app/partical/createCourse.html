@@ -9,37 +9,131 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
+                    <label for="course.duration">Duration</label>
+                    <input type="text" class="form-control" id="course.duration" placeholder="Duration" ng-model="vm.course.duration" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
                     <label for="course.description">Description</label>
                     <textarea class="form-control" id="course.description" placeholder="Description" ng-model="vm.course.description"></textarea>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="course.duration">Duration</label>
-                    <input type="text" class="form-control" id="course.duration" placeholder="Duration" ng-model="vm.course.duration" />
+                    <label for="course.demo">Demo Link</label>
+                    <textarea class="form-control" id="course.demo" placeholder="Demo Link" ng-model="vm.course.demo"></textarea>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="course.subscriptionAmt">Subscription Fee</label>
-                    <input type="text" class="form-control" id="course.subscriptionAmt" placeholder="Subscription Fee" ng-model="vm.course.subscriptionAmt" />
-                </div>
-            </div>
+        </div>
+        <div class="row" ng-if="false">
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="course.validFrom">Valid From</label>
-                    <input type="text" class="form-control" id="course.validFrom" placeholder="Valid From" ng-model="vm.course.validFrom" />
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="'dd-MMMM-yyyy'" ng-model="vm.course.validFrom" is-open="popup1.opened" datepicker-options="{startingDay: 1}" close-text="Close" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="popup1.opened = true">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </button>
+                        </span>
+                    </p>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="course.validTo">Valid Till</label>
-                    <input type="text" class="form-control" id="course.validTo" placeholder="Valid Till" ng-model="vm.course.validTo" />
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="'dd-MMMM-yyyy'" ng-model="vm.course.validTo" is-open="popup2.opened" datepicker-options="{startingDay: 1}" close-text="Close" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="popup2.opened = true">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </button>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.validTo">Category</label>
+                    <select class="form-control" ng-options="category.id as category.name for category in vm.categories" ng-model="vm.course.categoryId">
+                        <option value="">Choose</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-6">
-                <button type="submit" class="btn btn-default" ng-click="vm.updateProfile()">Update</button>
+                <div class="form-group">
+                    <label for="course.subscriptionFee">Subscription Fee</label>
+                    <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon1">
+                            <i class="fa fa-inr" aria-hidden="true"></i>
+                        </span>
+                        <input type="text" class="form-control" id="course.subscriptionFee" placeholder="Subscription Fee" ng-model="vm.course.subscriptionFee" />
+                    </div>
+                </div>
             </div>
         </div>
-    </form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.unit">Units</label>
+                    <p class="input-group">
+                        <input type="text" class="form-control" id="course.unit" placeholder="Enter unit name click '+' button ->" ng-model="vm.course.courseUnit" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="vm.addUnitToCourse();">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </button>
+                        </span>
+                    </p>
+                    <div>
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group btn-group-sm" role="group" ng-repeat="unit in vm.course.units">
+                                <button type="button" class="btn btn-default" style="cursor:default;" disabled="disabled" ng-bind="unit.name"></button>
+                                <button type="button" class="btn btn-default" ng-click="vm.course.units.splice($index, 1);">
+                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.instructor">Instructors</label>
+                    <select class="form-control" ng-change="vm.addUserToCourse();" ng-options="user as user.fullName for user in vm.users" ng-model="vm.course.courseUser">
+                        <option value="">Choose</option>
+                    </select>
+                    <div style="margin-top:10px;">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group btn-group-sm" role="group" ng-repeat="user in vm.course.instructors">
+                                <button type="button" class="btn btn-default" style="cursor:default;" disabled="disabled" ng-bind="user.fullName"></button>
+                                <button type="button" class="btn btn-default" ng-click="vm.course.instructors.splice($index, 1);">
+                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course.validTo">Upload Brochure</label>
+                    <div>
+                        <input class="btn btn-default" ngf-change="vm.profileImgUpload($file)" type="button" value="Select File" ngf-select ng-model="vm.course.file" name="file" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="20MB" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <button type="button" class="btn btn-default pull-right" ng-click="" ng-if="vm.objMode == 'edit'">Update</button>
+            <button type="button" class="btn btn-default pull-right" ng-click="" ng-if="vm.objMode == 'insert'">Add</button>
+        </div>
+</div>
+</form>
 </div>

@@ -4,11 +4,11 @@
             <div class="panel panel-default">
                 <!-- Default panel contents -->
                 <div class="panel-heading">
-                    <button type="button" class="btn btn-default pull-right visible-xs-block visible-md-block" ui-sref="main.createCourse">
+                    <button type="button" class="btn btn-default pull-right visible-xs-block visible-md-block" ng-click="vm.editCourse('insert');">
                         <i class="fa fa-plus" aria-hidden="true"></i> New Course
                     </button>
-                    <button type="button" class="btn btn-default pull-right visible-lg-block" ui-sref="main.createCourse">
-                        <i title="Add Course" class="fa fa-plus pull-right" aria-hidden="true"></i>
+                    <button type="button" class="btn btn-default pull-right visible-lg-block" ng-click="vm.editCourse('insert');">
+                        <i title="Add Course" class="fa fa-plus" aria-hidden="true"></i>
                     </button>
                     <div class="clearfix"></div>
                 </div>
@@ -31,9 +31,13 @@
                             <th scope="row" ng-bind="$index + 1"></th>
                             <td ng-bind="course.name"></td>
                             <td ng-bind="course.duration"></td>
-                            <td ng-bind="course.instructors"></td>
                             <td>
-                                <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.editCourse(course.id)" style="vertical-align:-4px;"></i>
+                                <span ng-repeat="instructor in course.instructors">
+                                    <span ng-bind="instructor.fullName"></span><span ng-if="!$last">, </span>
+                                </span>
+                            </td>
+                            <td>
+                                <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getCourseById(course.id); " style="vertical-align:-4px;"></i>
                                 <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteCourse(course.id)"></i>
                             </td>
                         </tr>

@@ -1,32 +1,59 @@
 <div class="container-fluid" ng-cloak>
     <div class="row" style="height:80%;overflow-y:auto;">
         <div class="col-md-3">
-            <uib-accordion close-others="true">
-                <uib-accordion-group ng-repeat="unit in vm.units" heading="{{unit.name}}" is-open="$first">
-                    <uib-tabset active="activePill" vertical="true" type="pills">
-                        <uib-tab heading="{{lesson}}" ng-repeat="lesson in unit.lessonsList" ng-click="vm.lesson = lesson"></uib-tab>
-                    </uib-tabset>
-                </uib-accordion-group>
-            </uib-accordion>
-        </div>
-        <div class="col-md-9" style="overflow-y:auto;">
-            <div class="page-header">
-                <h1 ng-bind="vm.lesson.name"></h1>
-            </div>
-            <div class="embed-responsive embed-responsive-16by9">
-                <iframe class="embed-responsive-item" src="//www.youtube.com/embed/zpOULjyy-n8?rel=0" allowfullscreen=""></iframe>
-            </div>
-            <div class="well well-sm">
-                <div>Related files</div>
-            </div>
-            <div>
-                <textarea rows="3" style="width:80%;"></textarea>
+            <div class="panel panel-info" ng-repeat="unit in vm.units" style="margin-bottom:4px;">
+                <div class="panel-heading"><b ng-bind="unit.name" style="margin-left:-4px;"></b></div>
+                <div class="list-group">
+                    <a class="list-group-item" href="javascript:void(0);" ng-repeat="lesson in unit.lessons" ng-click="vm.lesson = lesson" ng-bind="lesson.name" style="padding-left:20px;"></a>
+                </div>
             </div>
         </div>
-        <!-- <div class="col-md-3" style="overflow-y:auto;">
-            <uib-tabset active="activePill" vertical="true" type="pills">
-                <uib-tab index="{{$index}}" heading="{{lesson.name}}" ng-repeat="lesson in vm.lessons" ng-click="vm.lesson = lesson"></uib-tab>
-            </uib-tabset>
-        </div> -->
+        <div class="col-md-9">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 ng-bind="vm.lesson.name" style="margin:0px 0px 4px"></h2>
+                </div>
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" src="//www.youtube.com/embed/zpOULjyy-n8?rel=0" allowfullscreen=""></iframe>
+                </div>
+                <div class="panel-footer">
+                    <span>Related files: </span>
+                    <span>
+                        <span ng-repeat="file in vm.lesson.files">
+                            <i class="fa fa-file-pdf-o" aria-hidden="true"></i> 
+                            <span ng-bind="file.file"></span><span ng-if="!$last">, </span>
+                    </span>
+                    </span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-10">
+                    <textarea rows="3" style="width:96%" ng-model="vm.commentMsg"></textarea>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-default" ng-click="vm.commentOnLesson()">
+                        Send
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="media" ng-repeat="comment in vm.lesson.comments">
+                        <div class="media-left">
+                            <a href="#">
+                                <img class="media-object" src="/assets/images/avatar.png" alt="..." style="height:45px;">
+                            </a>
+                        </div>
+                        <div class="media-body well well-sm">
+                            <div class="media-heading">
+                                <h4 ng-bind="comment.user" style="margin:0px;"></h4>
+                                <span style="font-size: smaller;" ng-bind="comment.timestamp | date: format: medium"></span>
+                            </div>
+                            <p ng-bind="comment.comments"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

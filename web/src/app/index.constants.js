@@ -5,6 +5,7 @@
   angular
     .module('web')
     .constant('malarkey', malarkey)
-    .constant('moment', moment);
+    .constant('moment', moment)
+    .constant('_', window._);
 
 })();
