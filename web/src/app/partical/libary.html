@@ -1,12 +1,12 @@
 <div class="container-fluid" ng-cloak>
     <div class="row">
         <div class="col-md-4" ng-repeat="course in vm.courses">
-            <div class="panel" ng-style="{'border-color': course.color_code}">
-                <div class="panel-heading" ng-style="{'border-color': course.color_code, 'background-color': course.color_code}">
+            <div class="panel" ng-style="{'border-color': course.color_code || '#337AB7'}">
+                <div class="panel-heading" ng-style="{'border-color': course.color_code || '#337AB7', 'background-color': course.color_code || '#337AB7'}">
                     <span ng-bind="course.name"></span>
                     <span class="pull-right">
-                		<i class="fa fa-clock-o" aria-hidden="true"></i>
-                		<span ng-bind="course.duration"></span> hours</span>
+                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                        <span ng-bind="course.duration"></span> hours</span>
                 </div>
                 <div class="panel-body fixedheight">
                     <span ng-bind="course.description"></span>
@@ -14,9 +14,9 @@
                         <button type="button" class="btn btn-default btn-sm" ng-click="vm.showCourseInfo(course.id, course.name)">
                             <i class="fa fa-info" aria-hidden="true"></i> View More
                         </button>
-                        <button type="button" title="Download Course Info" class="btn btn-default btn-sm" ng-click="vm.downloadCourseInfo(course.id)">
+                        <a target="_self" href="{{course.filePath}}" download="{{course.fileName}}" title="Download Course Info" class="btn btn-default btn-sm">
                             <i class="fa fa-download" aria-hidden="true"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
                 <div class="panel-footer container-fluid">
@@ -32,9 +32,10 @@
                             </button>
                         </div>
                         <div class="col-md-8 col-xs-8 text-right">
-                            <button type="button" class="btn btn-default btn-sm">
+                            <a href="https://www.instamojo.com/Flavido/forumias-mains-test-series/" rel="im-checkout" data-behaviour="link" data-style="light" data-text="Checkout With Instamojo" data-token="c599eda8489c718db36fe146f134fb9a"></a>
+                            <!-- <button type="button" class="btn btn-default btn-sm">
                                 <i class="fa fa-credit-card" aria-hidden="true"></i> Subscribe Now
-                            </button>
+                            </button> -->
                         </div>
                     </div>
                 </div>

@@ -13,6 +13,7 @@
     //growl config
      growlProvider.globalReversedOrder(true);
      growlProvider.globalTimeToLive(5000);
+     growlProvider.globalDisableIcons(true);
   }
 
 })();

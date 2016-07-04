@@ -6,7 +6,7 @@
         .controller('MainController', MainController)
         .directive('youtube', youtube);
 
-
+    /** @ngInject */
     function youtube($sce) {
         return {
             restrict: 'EA',
@@ -34,6 +34,7 @@
         vm.courses = []; // list of (Library, my, all) courses[both]
         vm.units = []; // list of units, lessons to show on my lessons page[student]
         //for admin side only
+        vm.categoryPopup = false;
         vm.categories = []; // list of categories in create/edit course page
         vm.lessons = []; // list of all lessons in admin role
         vm.users = []; // list of (instructor, student) users in admin role
@@ -54,13 +55,18 @@
         vm.showCourseInfo = showCourseInfo;
         vm.signout = signout;
         //for admin side
+        vm.addCategory = addCategory;
         vm.getCourseById = getCourseById;
         vm.editCourse = editCourse;
         vm.addUnitToCourse = addUnitToCourse;
         vm.addUserToCourse = addUserToCourse;
+        vm.updateCourse = updateCourse;
+        vm.getAllLessons = getAllLessons;
         vm.getLessonById = getLessonById;
         vm.editLesson = editLesson;
-        vm.getAllLessons = getAllLessons;
+        vm.changeCourse = changeCourse;
+        vm.addFilesToLesson = addFilesToLesson;
+        vm.updateLesson = updateLesson;
         vm.getUsers = getUsers;
         vm.approveUser = approveUser;
         vm.getUserById = getUserById;
@@ -84,6 +90,7 @@
             } else {
                 if ($state.is('main.courses')) {
                     getAllCourses();
+                    showCategoryModal();
                 } else if ($state.is('main.lessons')) {
                     getAllLessons();
                 } else if ($state.is('main.instructors')) {
@@ -113,7 +120,7 @@
         }
 
         function getAllCourses() {
-            $http.get('/api/course/all').then(function(response) {
+            $http.get(CommonInfo.getAppUrl() + '/api/course/all').then(function(response) {
                 if (response && response.data) {
                     vm.courses = response.data.courses;
                 }
@@ -124,7 +131,7 @@
             var data = {
                 userId: vm.userInfo.id
             };
-            $http.post('/api/course/subscribed', data).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/course/subscribed', data).then(function(response) {
                 if (response && response.data) {
                     vm.courses = response.data.courses;
                 }
@@ -143,7 +150,7 @@
                 var data = {
                     courseId: courseId
                 };
-                $http.post('/api/unit/byCourse', data).then(function(response) {
+                $http.post(CommonInfo.getAppUrl() + '/api/unit/byCourse', data).then(function(response) {
                     if (response && response.data) {
                         vm.units = response.data.units;
                         vm.lesson = vm.units[0].lessons[0];
@@ -157,7 +164,7 @@
         }
 
         function getAllLessons() {
-            $http.get('/api/lesson/all').then(function(response) {
+            $http.get(CommonInfo.getAppUrl() + '/api/lesson/all').then(function(response) {
                 if (response && response.data) {
                     vm.lessons = response.data.lessons;
                 }
@@ -176,7 +183,7 @@
                 timestamp: 'Just now'
             };
             vm.lesson.comments.push(newComment);
-            $http.post('/api/lesson/addComment', data).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/lesson/addComment', data).then(function(response) {
                 if (response && response.data) {
                     console.log(response.data)
                 }
@@ -186,7 +193,7 @@
         }
 
         function getCourseById(courseId) {
-            $http.post('/api/course/byId', { 'courseId': courseId }).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/course/byId', { 'courseId': courseId }).then(function(response) {
                 if (response && response.data && response.data.course) {
                     CommonInfo.setInfo('course', response.data.course);
                     editCourse('edit', response.data.course);
@@ -195,12 +202,12 @@
         }
 
         function editCourse(mode, course) {
-            $http.get('/api/category/all').then(function(response) {
+            $http.get(CommonInfo.getAppUrl() + '/api/category/all').then(function(response) {
                 if (response && response.data && response.data.categories) {
                     vm.categories = response.data.categories;
                 }
             }, function(response) {});
-            $http.post('/api/user/byType', { 'type': 'instructor' }).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/user/byType', { 'type': 'instructor' }).then(function(response) {
                 if (response && response.data && response.data.users) {
                     vm.users = response.data.users;
                 }
@@ -232,8 +239,23 @@
             vm.course.courseUser = '';
         }
 
+        function updateCourse(files) {
+            Upload.upload({
+                url: CommonInfo.getAppUrl() + '/api/course',
+                data: { file: files, course: vm.course },
+                method: 'POST'
+            }).then(function(response) {
+                response = response.data;
+                if (response && !response.Error) {
+                    growl.success('Course Updated successfully');
+                }
+            }, function(resp) {
+                console.log('Error status: ' + resp.status);
+            });
+        }
+
         function getLessonById(lessonId) {
-            $http.post('/api/lesson/byId', { 'lessonId': lessonId }).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/lesson/byId', { 'lessonId': lessonId }).then(function(response) {
                 if (response && response.data && response.data.lesson) {
                     CommonInfo.setInfo('lesson', response.data.lesson);
                     editLesson('edit', response.data.lesson);
@@ -242,19 +264,49 @@
         }
 
         function editLesson(mode, lesson) {
-            $http.get('/api/course/courseAndUnits').then(function(response) {
+            vm.objMode = mode;
+            vm.lesson = lesson || { courses: [] };
+            vm.lesson.newFiles = [];
+            $http.get(CommonInfo.getAppUrl() + '/api/course/courseAndUnits').then(function(response) {
                 if (response && response.data && response.data.courses) {
                     vm.courseUnitList = response.data.courses;
+                    changeCourse();
                 }
             }, function(response) {});
-            vm.objMode = mode;
+
+
             if (mode == 'edit') {
                 $state.go('main.editLesson');
-                vm.lesson = lesson;
             } else if (mode == 'insert') {
-                vm.lesson = {};
                 $state.go('main.createLesson');
             }
+        }
+
+        function changeCourse() {
+            if (vm.lesson && vm.lesson.courses && vm.lesson.courses.length > 0) {
+                vm.lesson.unitList = _.find(vm.courseUnitList, { 'id': vm.lesson.courses[0].courseId }).units;
+            }
+        }
+
+        function addFilesToLesson() {
+            if (vm.lesson.file) {
+                vm.lesson.newFiles = _.uniqBy(vm.lesson.newFiles.concat(vm.lesson.file), 'name');
+            }
+        }
+
+        function updateLesson(files) {
+            Upload.upload({
+                url: CommonInfo.getAppUrl() + '/api/lesson',
+                data: { file: files, lesson: vm.lesson },
+                method: 'POST'
+            }).then(function(response) {
+                response = response.data;
+                if (response && !response.Error) {
+                    growl.success('Lesson Updated successfully');
+                }
+            }, function(resp) {
+                console.log('Error status: ' + resp.status);
+            });
         }
 
         // function getLessons(unitId) {
@@ -273,7 +325,7 @@
             var data = {
                 type: type
             };
-            $http.post('/api/user/byType', data).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/user/byType', data).then(function(response) {
                 if (response && response.data && response.data.users) {
                     vm.users = response.data.users;
                 }
@@ -283,7 +335,7 @@
         function approveUser(user) {
             var userInfo = angular.copy(user);
             userInfo.status = 'active';
-            $http.put('/api/user', userInfo).then(function(response) {
+            $http.put(CommonInfo.getAppUrl() + '/api/user', userInfo).then(function(response) {
                 if (response && response.data && !response.data.Error) {
                     user.status = 'active';
                 }
@@ -291,7 +343,7 @@
         }
 
         function getUserById(userId) {
-            $http.post('/api/user/byId', { userId: userId }).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/user/byId', { userId: userId }).then(function(response) {
                 if (response && response.data && response.data.user) {
                     CommonInfo.setInfo('editUser', response.data.user);
                     editUser('edit', response.data.user);
@@ -314,17 +366,15 @@
         function updateProfile(files) {
             if (vm.user) {
                 Upload.upload({
-                    url: '/api/user',
+                    url: CommonInfo.getAppUrl() + '/api/user',
                     data: { file: files, user: vm.user },
                     method: 'PUT'
                 }).then(function(response) {
                     response = response.data;
-                    if(response && !response.Error){
+                    if (response && !response.Error) {
                         growl.success('Profile updated successfully');
-                        if(vm.objMode == 'update'){
-                            if (response.user && response.user.profilePhoto) {
-                                vm.userInfo.profilePhoto = CommonInfo.getAppUrl() + response.user.profilePhoto;
-                            }
+                        if (vm.objMode == 'update') {
+                            vm.userInfo = response.user;
                             CommonInfo.setInfo('user', vm.userInfo);
                         }
                     }
@@ -372,7 +422,7 @@
                 var data = {
                     courseId: courseId
                 };
-                $http.post('/api/unit/byCourse', data).then(function(response) {
+                $http.post(CommonInfo.getAppUrl() + '/api/unit/byCourse', data).then(function(response) {
                     if (response && response.data && response.data.units && response.data.units.length > 0) {
                         var item = {
                             courseName: courseName,
@@ -391,11 +441,34 @@
                                 }
                             }
                         });
+                    } else {
+                        growl.info('No information for this course yet added');
                     }
                 }, function(response) {
 
                 });
             }
+        }
+
+        function showCategoryModal() {
+            vm.categories = [];
+            $http.get(CommonInfo.getAppUrl() + '/api/category/all').then(function(response) {
+                if(response && response.data.categories && response.data.categories.length > 0){
+                    vm.categories = response.data.categories;
+                }
+            });
+        }
+
+        function addCategory(){
+            console.log(vm.newCategory);
+            $http.post(CommonInfo.getAppUrl() + '/api/category', vm.newCategory).then(function(response){
+                if(response && response.data && !response.data.Error){
+                    vm.categories.push(vm.newCategory);
+                    vm.categoryPopup = false;
+                    vm.newCategory = {};
+                    growl.success('Category added successfully');
+                }
+            }, function(response){});
         }
     }
 })();

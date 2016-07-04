@@ -9,7 +9,7 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="course.duration">Duration</label>
+                    <label for="course.duration">Duration(in hours)</label>
                     <input type="text" class="form-control" id="course.duration" placeholder="Duration" ng-model="vm.course.duration" />
                 </div>
             </div>
@@ -125,14 +125,21 @@
                 <div class="form-group">
                     <label for="course.validTo">Upload Brochure</label>
                     <div>
-                        <input class="btn btn-default" ngf-change="vm.profileImgUpload($file)" type="button" value="Select File" ngf-select ng-model="vm.course.file" name="file" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="20MB" />
+                        <input class="btn btn-default" type="button" value="Select File" ngf-select ng-model="vm.course.file" name="file" ngf-pattern="'.pdf'" ngf-accept="'.pdf'" ngf-max-size="20MB" />
+                        <span ng-if="vm.course.file.name || vm.course.fileName">
+                             <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                             <span ng-bind="vm.course.file.name || vm.course.fileName"></span>
+                             <i class="fa fa-trash-o" aria-hidden="true" ng-click="vm.course.file = ''"></i>
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-12">
-            <button type="button" class="btn btn-default pull-right" ng-click="" ng-if="vm.objMode == 'edit'">Update</button>
-            <button type="button" class="btn btn-default pull-right" ng-click="" ng-if="vm.objMode == 'insert'">Add</button>
+            <button type="button" class="btn btn-default pull-right" ng-click="vm.updateCourse(vm.course.file);">
+                <span  ng-if="vm.objMode == 'edit'">Update</span>
+                <span  ng-if="vm.objMode == 'insert'">Save</span>
+            </button>
         </div>
 </div>
 </form>

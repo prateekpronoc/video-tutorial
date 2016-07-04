@@ -62,7 +62,7 @@ var self = {
     getLessonsComments: function(connection, id) {
         var query, queryValues;
         if (id) {
-            query = "SELECT * FROM ?? where lesson_id = ?";
+            query = "SELECT * FROM ?? where lessonId = ?";
             queryValues = ["lesson_comments", id];
         } else {
             query = "SELECT * FROM ??";
@@ -72,9 +72,13 @@ var self = {
         connection.query(query, function(err, rows) {
             if (rows && rows.length > 0) {
                 _.forEach(rows, function(value, key) {
-                    var lesson = _.find(lessonsList, { 'id': value.lesson_id });
+                    var lesson = _.find(lessonsList, { 'id': value.lessonId });
                     lesson.comments = lesson.comments || [];
-                    value.user = _.find(usersList, { 'id': value.user_id }).fullName;
+                    var user = _.find(usersList, { 'id': value.userId });
+                    value.commentedBy = {
+                        profilePhoto: user.profilePhoto,
+                        fullName: user.fullName
+                    };
                     lesson.comments.push(value);
                 });
             }
@@ -87,7 +91,7 @@ var self = {
         connection.query(query, function(err, rows) {
             if (rows && rows.length > 0) {
                 _.forEach(rows, function(value, key) {
-                    var lesson = _.find(lessonsList, { 'id': value.lesson_id });
+                    var lesson = _.find(lessonsList, { 'id': value.lessonId });
                     lesson.files = lesson.files || [];
                     lesson.files.push(value);
                 });
@@ -189,7 +193,7 @@ var self = {
                 }
                 var courseId = rows.insertId || request.id;
                 query = "DELETE FROM ?? where ?? = ?";
-                queryValues = ["courses_instructor", "course_id", courseId];
+                queryValues = ["courses_instructor", "courseId", courseId];
                 query = mysql.format(query, queryValues);
                 connection.query(query, function(err, rows) {
                     if (err) {
@@ -198,10 +202,10 @@ var self = {
                         });
                     }
                     query = "INSERT INTO ??(??, ??) values ?";
-                    queryValues = ["courses_instructor", "course_id", "user_id"];
+                    queryValues = ["courses_instructor", "courseId", "userId"];
                     var values = [];
-                    for (var i = 0; i < request.usersList.length; i++) {
-                        values.push([courseId, request.usersList[i]]);
+                    for (var i = 0; i < request.instructors.length; i++) {
+                        values.push([courseId, request.instructors[i].id]);
                     }
                     queryValues.push(values);
                     query = mysql.format(query, queryValues);
@@ -217,7 +221,7 @@ var self = {
                                     callback(err);
                                 });
                             }
-                            callback(err, rows);
+                            callback(err, rows, courseId);
                         });
                     });
                 });
@@ -228,18 +232,19 @@ var self = {
         var query, queryValues;
         if (request.id) {
             query = "UPDATE ?? SET ? where ?? = ?";
-            queryValues = ["courses", { "name": request.name, "description": request.description, "demo": request.demo, "validFrom": request.validFrom, "validTo": request.validTo }, "id", request.id];
+            queryValues = ["courses", { "name": request.name, "description": request.description, "demo": request.demo, "filePath": request.filePath, "fileName": request.fileName }, "id", request.id];
         } else {
             query = "INSERT INTO ??(??, ??, ??, ??, ??) values (?, ?, ?, ?, ?)";
-            queryValues = ["courses", "name", "description", "demo", "validFrom", "validTo", request.name, request.description, request.demo, request.validFrom, request.validTo];
+            queryValues = ["courses", "name", "description", "demo", "filePath", "fileName", request.name, request.description, request.demo, request.filePath, request.fileName];
         }
         query = mysql.format(query, queryValues);
-        if (request.usersList && request.usersList.length > 0) {
-            self.addCourseWithUsers(query, request, connection, function(err, rows) {
+        if (request.instructors && request.instructors.length > 0) {
+            self.addCourseWithUsers(query, request, connection, function(err, rows, courseId) {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
-                    callback({ "Error": false, "Message": "Course Added" });
+                    self.getCoursesList(connection);
+                    callback({ "Error": false, "Message": "Course Added", "courseId": courseId });
                 }
             });
         } else {
@@ -247,13 +252,14 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
-                    callback({ "Error": false, "Message": "Course Added" });
+                    self.getCoursesList(connection);
+                    callback({ "Error": false, "Message": "Course Added", "courseId": courseId });
                 }
             });
         }
     },
     getCourseById: function(request, connection, callback) {
-        var query = "SELECT * from ?? u where u.id IN (SELECT cul.unit_id FROM course_unit_lesson_r cul where cul.course_id = ?)";
+        var query = "SELECT u.*, sum(l.duration) as unitDuration from ?? u LEFT JOIN (tutorialsdb.course_unit_lesson_r cul, tutorialsdb.lessons l) on u.id = cul.unitId and l.id = cul.lessonId where u.courseId = ? group by u.id";
         var queryValues = ["units", request.courseId];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
@@ -261,13 +267,14 @@ var self = {
                 callback({ "Error": true, "Message": err });
             } else {
                 var result = _.find(coursesList, { 'id': request.courseId });
+                result.duration = _.sum(_.map(rows, 'unitDuration'));
                 result.units = rows;
                 callback({ "Error": false, "Message": "Success", "course": result });
             }
         });
     },
     getCourseAndUnits: function(connection, callback) {
-        var query = "SELECT c.id, c.name, GROUP_CONCAT(cul.unit_id) as unitList from ?? c LEFT JOIN (course_unit_lesson_r cul) ON c.id = cul.course_id GROUP BY c.id";
+        var query = "SELECT c.id, c.name, GROUP_CONCAT(u.id) as unitList from ?? c LEFT JOIN (units u) ON c.id = u.courseId GROUP BY c.id";
         var queryValues = ["courses"];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
@@ -291,14 +298,14 @@ var self = {
     getAllCourses: function(type, id, connection, callback) { /// get list of course(all/subscribed/unsubscribed)
         var query, queryValues;
         if (type == "all") {
-            query = "SELECT c.id, GROUP_CONCAT(ci.user_id) as instructorList from ?? c LEFT JOIN (courses_instructor ci) ON c.id = ci.course_id GROUP BY c.id";
+            query = "SELECT c.id, GROUP_CONCAT(ci.userId) as instructorList, sum(l.duration) as courseDuration from ?? c LEFT JOIN (courses_instructor ci) ON c.id = ci.courseId LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId GROUP BY c.id";
             queryValues = ["courses"];
         } else if (type == "subscribed") {
-            query = "SELECT c.id, GROUP_CONCAT(ci.user_id) as instructorList from ?? c JOIN (courses_instructor ci) ON c.id = ci.course_id and c.id IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
-            queryValues = ["courses", "course_id", "user_id", id];
+            query = "SELECT c.id, GROUP_CONCAT(ci.userId) as instructorList, sum(l.duration) as courseDuration from ?? c LEFT JOIN (courses_instructor ci) ON c.id = ci.courseId LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.id IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
+            queryValues = ["courses", "courseId", "userId", id];
         } else if (type == "unsubscribed") {
-            query = "SELECT c.id, GROUP_CONCAT(ci.user_id) as instructorList from ?? c JOIN (courses_instructor ci) ON c.id = ci.course_id and c.id NOT IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
-            queryValues = ["courses", "course_id", "user_id", id];
+            query = "SELECT c.id, GROUP_CONCAT(ci.userId) as instructorList, sum(l.duration) as courseDuration from ?? c LEFT JOIN (courses_instructor ci) ON c.id = ci.courseId LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.id NOT IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
+            queryValues = ["courses", "courseId", "userId", id];
         }
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
@@ -308,9 +315,11 @@ var self = {
                 var result = [];
                 _.forEach(rows, function(value, key) {
                     var course = _.find(coursesList, { 'id': value.id });
+                    course.duration = value.courseDuration;
                     course.instructors = [];
                     if (value.instructorList) {
-                        _.forEach(value.instructorList.split(","), function(childValue, childKey) {
+                    	var instructorList = _.uniq(value.instructorList.split(","));
+                        _.forEach(instructorList, function(childValue, childKey) {
                             var user = _.find(usersList, { 'id': parseInt(childValue) });
                             if (user) {
                                 delete user.password;
@@ -324,10 +333,35 @@ var self = {
             }
         });
     },
+    addUpdateCourseUnit: function(request, courseId, connection, callback) {
+        var query, queryValues;
+        var updateList = _.filter(request, 'id');
+        var insertList = _.filter(request, function(o) {
+            return !o.id;
+        });
+        if (request && request.length > 0) {
+            query = "INSERT INTO ??(??, ??, ??, ??) values ? ON DUPLICATE KEY UPDATE name=VALUES(name), courseId=VALUES(courseId)";
+            queryValues = ["units", "id", "name", "description", "courseId"];
+            var values = [];
+            for (var i = 0; i < request.length; i++) {
+                values.push([request[i].id, request[i].name, request[i].name, courseId]);
+            }
+            queryValues.push(values);
+            query = mysql.format(query, queryValues);
+            connection.query(query, function(err, rows) {
+                if (err) {
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    self.getUnitsList(connection);
+                    callback({ "Error": false, "Message": "Success" });
+                }
+            });
+        }
+    },
     getAllUnits: function(type, id, connection, callback) { /// get list of units(by course id)
         var query, queryValues;
         if (type == 'byCourseId') {
-            query = "SELECT u.*, GROUP_CONCAT(cul.lesson_id) as lessonList from ?? u JOIN (course_unit_lesson_r cul) ON cul.course_id = ? and u.id = cul.unit_id GROUP BY u.id";
+            query = "SELECT u.*, GROUP_CONCAT(cul.lessonId) as lessonList from ?? u LEFT JOIN (course_unit_lesson_r cul) ON u.id = cul.unitId where u.courseId = ? GROUP BY u.id";
             queryValues = ["units", id];
         }
         query = mysql.format(query, queryValues);
@@ -353,13 +387,8 @@ var self = {
     },
     addUpdateLesson: function(request, connection, callback) { /// add update lesson
         var query, queryValues;
-        if (request.id) {
-            query = "UPDATE ?? SET ? where ?? = ?";
-            queryValues = ["lessons", { "name": request.name, "description": request.description, "video": request.video, "air_date": request.airDate }, "id", request.id];
-        } else {
-            query = "INSERT INTO ??(??, ??, ??, ??) values (?, ?, ?, ?)";
-            queryValues = ["lessons", "name", "description", "video", "air_date", request.name, request.description, request.video, request.airDate];
-        }
+        query = "INSERT INTO ??(??, ??, ??, ??, ??) values (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description), video=VALUES(video), duration=VALUES(duration)";
+        queryValues = ["lessons", "id", "name", "description", "video", "duration", request.id, request.name, request.description, request.video, request.duration];
         query = mysql.format(query, queryValues);
         connection.beginTransaction(function(err) {
             if (err) {
@@ -372,22 +401,9 @@ var self = {
                     });
                 }
                 var lessonId = rows.insertId || request.id;
-                query = "DELETE FROM ?? where ?? = ?";
-                queryValues = ["lesson_files", "lesson_id", lessonId];
-                query = mysql.format(query, queryValues);
-                connection.query(query, function(err, rows) {
-                    if (err) {
-                        return connection.rollback(function() {
-                            callback({ "Error": true, "Message": err });
-                        });
-                    }
-                    query = "INSERT INTO ??(??, ??) values ?";
-                    queryValues = ["lesson_files", "lesson_id", "file"];
-                    var values = [];
-                    for (var i = 0; i < request.usersList.length; i++) {
-                        values.push([courseId, request.usersList[i]]);
-                    }
-                    queryValues.push(values);
+                if (request.courses && request.courses.length > 0) {
+                    query = "INSERT INTO ??(??, ??, ??, ??) values (?, ?, ?, ?) ON DUPLICATE KEY UPDATE courseId=VALUES(courseId), lessonId=VALUES(lessonId), unitId=VALUES(unitId)";
+                    queryValues = ["course_unit_lesson_r", "id", "lessonId", "courseId", "unitId", request.courses[0].id, lessonId, request.courses[0].courseId, request.courses[0].unitId];
                     query = mysql.format(query, queryValues);
                     connection.query(query, function(err, rows) {
                         if (err) {
@@ -401,15 +417,42 @@ var self = {
                                     callback({ "Error": true, "Message": err });
                                 });
                             }
-                            callback({ "Error": false, "Message": "Unit added" });
+                            callback({ "Error": false, "Message": "Lesson added", "lessonId": lessonId });
                         });
                     });
-                });
+                } else {
+                    connection.commit(function(err) {
+                        if (err) {
+                            return connection.rollback(function() {
+                                callback({ "Error": true, "Message": err });
+                            });
+                        }
+                        callback({ "Error": false, "Message": "Lesson added", "lessonId": lessonId });
+                    });
+                }
             });
         });
     },
+    addFilesToLesson: function(request, connection, callback) {
+        var query = "INSERT INTO ??(??, ??, ??) values ?";
+        var queryValues = ["lesson_files", "lessonId", "fileName", "filePath"];
+        var values = [];
+        for (var i = 0; i < request.filesList.length; i++) {
+            values.push([request.lessonId, request.filesList[i].fileName, request.filesList[i].filePath]);
+        }
+        queryValues.push(values);
+        query = mysql.format(query, queryValues);
+        connection.query(query, function(err, rows){
+        	if (err) {
+                callback({ "Error": true, "Message": err });
+            } else {
+                self.getLessonsList(connection);
+                callback({ "Error": false, "Message": "Success" });
+            }
+        });
+    },
     getLessonById: function(request, connection, callback) {
-        var query = "SELECT * FROM ?? cul where cul.lesson_id = ?";
+        var query = "SELECT * FROM ?? cul where cul.lessonId = ?";
         var queryValues = ["course_unit_lesson_r", request.lessonId];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
@@ -420,12 +463,9 @@ var self = {
                 result.courses = [];
                 if (rows && rows.length > 0) {
                     _.forEach(rows, function(value, key) {
-                        var course = {
-                            id: value.course_id,
-                            name: _.cloneDeep(_.find(coursesList, { 'id': value.course_id }).name),
-                            unit: _.cloneDeep(_.find(unitsList, { 'id': value.unit_id }))
-                        };
-                        result.courses.push(course);
+                        value.courseName = _.cloneDeep(_.find(coursesList, { 'id': value.courseId }).name);
+                        value.unitName = _.cloneDeep(_.find(unitsList, { 'id': value.unitId }).name);
+                        result.courses.push(value);
                     });
                 }
                 callback({ "Error": false, "Message": "Success", "lesson": result });
@@ -439,7 +479,7 @@ var self = {
     },
     addCommentOnLesson: function(request, connection, callback) { /// insert comment to lesson
         var query = "INSERT INTO ??(??, ??, ??) values (?, ?, ?)";
-        var queryValues = ["lesson_comments", "lesson_id", "user_id", "comments", request.lessonId, request.userId, request.comment];
+        var queryValues = ["lesson_comments", "lessonId", "userId", "comments", request.lessonId, request.userId, request.comment];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
             if (err) {
@@ -453,7 +493,7 @@ var self = {
     getAllCategories: function(type, id, connection, callback) { /// get list of all category
         var query, queryValues;
         if (type = "all") {
-            query = "SELECT * FROM ??";
+            query = "SELECT ct.*, count(c.id) as coursesCount FROM ?? ct LEFT JOIN (courses c) ON c.categoryId = ct.id GROUP BY ct.id";
             queryValues = ["categories"];
         }
         query = mysql.format(query, queryValues);
@@ -464,6 +504,18 @@ var self = {
                 callback({ "Error": false, "Message": "Success", "categories": rows });
             }
         });
+    },
+    addCategories: function(request, connection, callback) {
+    	var query = "INSERT INTO ??(??) VALUES (?)";
+    	var queryValues = ["categories", "name", request.name];
+    	query = mysql.format(query, queryValues);
+    	connection.query(query, function (err, rows) {
+    		if (err) {
+                callback({ "Error": true, "Message": err });
+            } else {
+                callback({ "Error": false, "Message": "Success" });
+            }
+    	})
     }
 };
 

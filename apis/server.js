@@ -9,7 +9,8 @@ var config = require('./config.js');
 var rest = require("./REST.js");
 var app = express();
 var multiparty = require('connect-multiparty'),
-    multipartyMiddleware = multiparty({ uploadDir: './public/imagesPath' });
+    imgUpload = multiparty({ uploadDir: './public/imagesPath' }),
+    fileUpload = multiparty({ uploadDir: './public/filesPath' });
 
 function Apis() {
     var self = this;
@@ -36,7 +37,7 @@ Apis.prototype.configureExpress = function(connection) {
     app.use(express.static('public'));
     var router = express.Router();
     app.use('/api', router);
-    var rest_router = new rest(router, connection, md5, jwt, multipartyMiddleware);
+    var rest_router = new rest(router, connection, md5, jwt, imgUpload, fileUpload);
     self.startServer();
 }
 

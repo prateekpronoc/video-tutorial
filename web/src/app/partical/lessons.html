@@ -17,7 +17,7 @@
                             <th>#</th>
                             <th>Lesson Name</th>
                             <th>Description</th>
-                            <th>Files</th>
+                            <th style="width:30%;">Files</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -26,9 +26,9 @@
                             <th scope="row" ng-bind="$index + 1"></th>
                             <td ng-bind="lesson.name"></td>
                             <td ng-bind="lesson.description"></td>
-                            <td>
+                            <td style="width:30%;">
                                 <span ng-repeat="file in lesson.files">
-                                    <span ng-bind="file.file"></span><span ng-if="!$last">, </span>
+                                    <span ng-bind="file.fileName"></span><span ng-if="!$last">, </span>
                                 </span>
                             </td>
                             <td>

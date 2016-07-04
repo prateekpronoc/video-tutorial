@@ -5,7 +5,7 @@
                 <div class="panel-body">
                     <div class="center-block" style="height:150px; width:150px;">
                         <img style="width:150px;" class="img-rounded center-block" ng-if="vm.user.profilePhoto">
-                        <img ngf-src="vm.user.profilePhoto || '/assets/images/defaultProfileImg.png'" ngf-resize="{width: 150, height: 150, quality: 0.9}" style="border:1px solid lightseagreen; height:150px;" />
+                        <img ngf-src="vm.user.profilePhoto || 'assets/images/defaultProfileImg.png'" ngf-resize="{width: 150, height: 150, quality: 0.9}" style="border:1px solid lightseagreen; height:150px;" />
                     </div>
                     <br />
                     <button class="btn btn-default center-block" ngf-select type="file" ng-model="vm.user.profilePhoto" name="file" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="20MB">

@@ -33,7 +33,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="lesson.course">Select Course</label>
-                        <select class="form-control" ng-options="course as course.name for course in vm.courseUnitList" ng-model="vm.lesson.course">
+                        <select class="form-control" ng-change="vm.changeCourse()" ng-options="course.id as course.name for course in vm.courseUnitList" ng-model="vm.lesson.courses[0].courseId">
                             <option value="">Choose</option>
                         </select>
                     </div>
@@ -41,23 +41,19 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="lesson.unit">Select Unit</label>
-                        <!-- <select class="form-control" ng-options="unit as unit.name for unit in vm.lesson.course.units" ng-model="vm.lesson.unit">
+                        <select class="form-control" ng-options="unit.id as unit.name for unit in vm.lesson.unitList" ng-model="vm.lesson.courses[0].unitId">
                             <option value="">Choose</option>
                         </select>
-                        <button class="btn btn-default" type="button">
-                            <i class="fa fa-plus" aria-hidden="true"></i>
-                        </button> -->
-
-                        <p class="input-group">
-                        <select class="form-control" ng-options="unit as unit.name for unit in vm.lesson.course.units" ng-model="vm.lesson.unit">
-                            <option value="">Choose</option>
-                        </select>
-                        <span class="input-group-btn">
-                            <<button class="btn btn-default" type="button">
-                            <i class="fa fa-plus" aria-hidden="true"></i>
-                        </button>
-                        </span>
-                    </p>
+                        <!-- <p class="input-group">
+                            <select class="form-control" ng-options="unit.id as unit.name for unit in vm.lesson.unitList" ng-model="vm.lesson.courses[0].unitId">
+                                <option value="">Choose</option>
+                            </select>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-plus" aria-hidden="true"></i>
+                                </button>
+                            </span>
+                        </p> -->
                     </div>
                 </div>
             </div>
@@ -65,13 +61,23 @@
                 <div class="form-group">
                     <label for="lesson.files">Upload Files</label>
                     <div>
-                        <input class="btn btn-default" ngf-change="vm.profileImgUpload($file)" type="button" value="Select File" ngf-select ng-model="vm.lesson.files" name="file" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="20MB" />
+                        <input class="btn btn-default" multiple ng-change="vm.addFilesToLesson();" type="button" value="Select File" ngf-select ng-model="vm.lesson.file" name="file" ngf-pattern="'.pdf'" ngf-accept="'.pdf'" ngf-max-size="20MB" />
                     </div>
-                    <div>
+                    <div style="margin-top:10px;">
                         <div class="btn-toolbar" role="toolbar">
                             <div class="btn-group btn-group-sm" role="group" ng-repeat="file in vm.lesson.files">
-                                <button type="button" class="btn btn-default" style="cursor:default;" disabled="disabled" ng-bind="file.file"></button>
+                                <button type="button" class="btn btn-default" style="cursor:default;" disabled="disabled" ng-bind="file.fileName"></button>
                                 <button type="button" class="btn btn-default" ng-click="vm.lesson.files.splice($index, 1);">
+                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group btn-group-sm" role="group" ng-repeat="file in vm.lesson.newFiles">
+                                <button type="button" class="btn btn-default" style="cursor:default;" disabled="disabled" ng-bind="file.name"></button>
+                                <button type="button" class="btn btn-default" ng-click="vm.lesson.newFiles.splice($index, 1);">
                                     <i class="fa fa-trash-o" aria-hidden="true"></i>
                                 </button>
                             </div>
@@ -82,8 +88,10 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-default pull-right" ng-click="" ng-if="vm.objMode == 'edit'">Update</button>
-                <button type="button" class="btn btn-default pull-right" ng-click="" ng-if="vm.objMode == 'insert'">Add</button>
+                <button type="button" class="btn btn-default pull-right" ng-click="vm.updateLesson(vm.lesson.newFiles)">
+                    <span ng-if="vm.objMode == 'edit'">Update</span>
+                    <span ng-if="vm.objMode == 'insert'">Save</span>
+                </button>
             </div>
         </div>
     </form>

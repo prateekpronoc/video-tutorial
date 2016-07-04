@@ -10,13 +10,13 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="#">
-                    <img src="/assets/images/forumias-small.png" style="margin-top:-11px;" />
+                    <img src="assets/images/forumias-small.png" style="margin-top:-11px;" />
                 </a>
             </div>
             <div class="navbar-collapse collapse in" uib-collapse="vm.isCollapsed" aria-expanded="true" style="margin-right:25px;">
                 <!-- <div class="collapse navbar-collapse" uib-dropdown-menu role="menu" aria-labelledby="single-button"> -->
                 <span class="nav navbar-nav navbar-right" uib-dropdown>
-                    <img ng-src="{{vm.userInfo.profilePhoto || '/assets/images/defaultProfileImg.png'}}" style="width:50px;border:1px solid gainsboro;" class="img-responsive center-block img-circle" id="simple-dropdown" uib-dropdown-toggle>
+                    <img ng-src="{{vm.userInfo.profilePhoto || 'assets/images/defaultProfileImg.png'}}" style="width:50px;border:1px solid gainsboro;" class="img-responsive center-block img-circle" id="simple-dropdown" uib-dropdown-toggle>
                     <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
                         <li ng-repeat="choice in items">
                             <li role="menuitem" ng-click="vm.editUser('update', vm.userInfo)"><a href="javascript:void(0);">Edit Profile</a></li>
