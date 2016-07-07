@@ -61,6 +61,10 @@
         url: '/addLesson',
         templateUrl: 'app/partical/createLesson.html'
       })
+      .state('main.comments', {
+        url: '/comments',
+        templateUrl: 'app/partical/lessonComments.html'
+      })
       .state('main.instructors', {
         url: '/instructors',
         templateUrl: 'app/partical/users.html'

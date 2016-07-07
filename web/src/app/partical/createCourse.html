@@ -18,13 +18,17 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="course.description">Description</label>
-                    <textarea class="form-control" id="course.description" placeholder="Description" ng-model="vm.course.description"></textarea>
+                    <textarea class="form-control" id="course.description" placeholder="Description" ng-model="vm.course.description" rows="5"></textarea>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="course.demo">Demo Link</label>
-                    <textarea class="form-control" id="course.demo" placeholder="Demo Link" ng-model="vm.course.demo"></textarea>
+                    <label for="course.demoVideo">Demo Video Link</label>
+                    <input type="text" class="form-control" id="course.demoVideo" placeholder="Demo Video Link" ng-model="vm.course.demoVideo" />
+                </div>
+                <div class="form-group">
+                    <label for="course.demoPoster">Demo Poster Link</label>
+                    <input type="text" class="form-control" id="course.demoPoster" placeholder="Demo Poster Link" ng-model="vm.course.demoPoster" />
                 </div>
             </div>
         </div>
@@ -91,9 +95,9 @@
                     </p>
                     <div>
                         <div class="btn-toolbar" role="toolbar">
-                            <div class="btn-group btn-group-sm" role="group" ng-repeat="unit in vm.course.units">
+                            <div class="btn-group btn-group-sm" role="group" ng-repeat="unit in vm.course.units" ng-if="!unit.isDeleted">
                                 <button type="button" class="btn btn-default" style="cursor:default;" disabled="disabled" ng-bind="unit.name"></button>
-                                <button type="button" class="btn btn-default" ng-click="vm.course.units.splice($index, 1);">
+                                <button type="button" class="btn btn-default" ng-click="unit.isDeleted = true">
                                     <i class="fa fa-trash-o" aria-hidden="true"></i>
                                 </button>
                             </div>
@@ -109,9 +113,9 @@
                     </select>
                     <div style="margin-top:10px;">
                         <div class="btn-toolbar" role="toolbar">
-                            <div class="btn-group btn-group-sm" role="group" ng-repeat="user in vm.course.instructors">
+                            <div class="btn-group btn-group-sm" role="group" ng-repeat="user in vm.course.instructors" ng-if="!user.isDeleted">
                                 <button type="button" class="btn btn-default" style="cursor:default;" disabled="disabled" ng-bind="user.fullName"></button>
-                                <button type="button" class="btn btn-default" ng-click="vm.course.instructors.splice($index, 1);">
+                                <button type="button" class="btn btn-default" ng-click="user.isDeleted = true">
                                     <i class="fa fa-trash-o" aria-hidden="true"></i>
                                 </button>
                             </div>

@@ -1,0 +1,38 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="media" ng-repeat="comment in vm.lessonComments">
+                <div class="media-left">
+                    <a href="#">
+                        <img class="media-object" ng-src="{{comment.commentedBy.profilePhoto || 'assets/images/defaultProfileImg.png'}}" alt="..." style="height:45px;">
+                    </a>
+                </div>
+                <div class="media-body well well-sm">
+                    <div class="media-heading">
+                        <h4 ng-bind="comment.commentedBy.fullName" style="margin:0px;"></h4>
+                        <span style="font-size: smaller;" ng-bind="comment.timestamp | date: format: medium"></span>
+                    </div>
+                    <p ng-bind="comment.comments"></p>
+                </div>
+            </div>
+            <div class="media">
+                <div class="media-left">
+                    <a href="#">
+                        <img class="media-object" ng-src="{{vm.userInfo.profilePhoto || 'assets/images/defaultProfileImg.png'}}" alt="..." style="height:45px;">
+                    </a>
+                </div>
+                <div class="media-body well well-sm">
+                    <div class="media-heading">
+                        <h4 ng-bind="vm.userInfo.fullName" style="margin:0px;"></h4>
+                    </div>
+                    <p>
+                        <textarea rows="3" style="width:100%" ng-model="vm.commentMsg"></textarea>
+                        <button type="button" class="btn btn-default pull-right" ng-click="vm.commentOnLesson()">
+                            Send
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

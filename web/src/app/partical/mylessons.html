@@ -4,7 +4,7 @@
             <div class="panel panel-info" ng-repeat="unit in vm.units" style="margin-bottom:4px;">
                 <div class="panel-heading"><b ng-bind="unit.name" style="margin-left:-4px;"></b></div>
                 <div class="list-group">
-                    <a class="list-group-item" href="javascript:void(0);" ng-repeat="lesson in unit.lessons" ng-click="vm.lesson = lesson" ng-bind="lesson.name" style="padding-left:20px;"></a>
+                    <a class="list-group-item" href="javascript:void(0);" ng-repeat="lesson in unit.lessons" ng-click="vm.selectLesson(lesson)" ng-bind="lesson.name" style="padding-left:20px;"></a>
                 </div>
             </div>
         </div>
@@ -13,8 +13,8 @@
                 <div class="panel-heading">
                     <h2 ng-bind="vm.lesson.name" style="margin:0px 0px 4px"></h2>
                 </div>
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe class="embed-responsive-item" src="//www.youtube.com/embed/zpOULjyy-n8?rel=0" allowfullscreen=""></iframe>
+                <div class="embed-responsive embed-responsive-16by9" ng-if="vm.lesson.options">
+                    <jwplayerjs setup="vm.lesson.options"></jwplayerjs>
                 </div>
                 <div class="panel-footer">
                     <span>Related files: </span>
@@ -43,7 +43,7 @@
                     <div class="media" ng-repeat="comment in vm.lesson.comments">
                         <div class="media-left">
                             <a href="#">
-                                <img class="media-object" ng-src="{{comment.commentedBy.profilePhoto || '/assets/images/defaultProfileImg.png'}}" alt="..." style="height:45px;">
+                                <img class="media-object" ng-src="{{comment.commentedBy.profilePhoto || 'assets/images/defaultProfileImg.png'}}" alt="..." style="height:45px;">
                             </a>
                         </div>
                         <div class="media-body well well-sm">

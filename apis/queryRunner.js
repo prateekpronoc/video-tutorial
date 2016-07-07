@@ -5,7 +5,6 @@ var usersList = coursesList = lessonsList = unitsList = [];
 var self = {
     initdictionaries: function(connection) {
         self.getUsersList(connection);
-        self.getCoursesList(connection);
         self.getUnitsList(connection);
         self.getLessonsList(connection);
     },
@@ -18,23 +17,48 @@ var self = {
                 console.log(err);
             } else {
                 usersList = rows;
+                self.getCoursesList(connection);
             }
         });
     },
     getCoursesList: function(connection) {
-        var query = "SELECT c.*, ct.name as category FROM ?? c LEFT JOIN (categories ct) ON ct.id = c.categoryId";
+        var query = "SELECT c.*, ct.name as category FROM ?? c LEFT JOIN (categories ct) ON ct.id = c.categoryId WHERE c.isDeleted = false";
         var queryValues = ["courses"];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
             if (err) {
                 console.log(err);
             } else {
+                _.forEach(rows, function(value, key) {
+                    value.instructors = [];
+                });
                 coursesList = rows;
+                self.getCourseInstructors(connection);
+            }
+        })
+    },
+    getCourseInstructors: function(connection) {
+        var query = "SELECT ui.* FROM ?? ui WHERE ui.isDeleted = false";
+        var queryValues = ["courses_instructor"];
+        query = mysql.format(query, queryValues);
+        connection.query(query, function(err, rows) {
+            if (rows && rows.length > 0) {
+                _.forEach(rows, function(value, key) {
+                    var course = _.find(coursesList, { 'id': value.courseId });
+                    if (course) {
+                        course.instructors = course.instructors || [];
+                        var user = _.find(usersList, { 'id': value.userId });
+                        if (user) {
+                            value.fullName = user ? user.fullName : '';
+                            course.instructors.push(value);
+                        }
+                    }
+                });
             }
         })
     },
     getUnitsList: function(connection) {
-        var query = "SELECT u.id, u.name FROM ?? u";
+        var query = "SELECT u.id, u.name FROM ?? u WHERE u.isDeleted = false";
         var queryValues = ["units"];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
@@ -46,7 +70,7 @@ var self = {
         })
     },
     getLessonsList: function(connection) {
-        var query = "SELECT * FROM ??";
+        var query = "SELECT * FROM ?? l WHERE l.isDeleted = false";
         var queryValues = ["lessons"];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
@@ -73,13 +97,15 @@ var self = {
             if (rows && rows.length > 0) {
                 _.forEach(rows, function(value, key) {
                     var lesson = _.find(lessonsList, { 'id': value.lessonId });
-                    lesson.comments = lesson.comments || [];
-                    var user = _.find(usersList, { 'id': value.userId });
-                    value.commentedBy = {
-                        profilePhoto: user.profilePhoto,
-                        fullName: user.fullName
-                    };
-                    lesson.comments.push(value);
+                    if (lesson) {
+                        lesson.comments = lesson.comments || [];
+                        var user = _.find(usersList, { 'id': value.userId });
+                        value.commentedBy = {
+                            profilePhoto: user.profilePhoto,
+                            fullName: user.fullName
+                        };
+                        lesson.comments.push(value);
+                    }
                 });
             }
         });
@@ -92,15 +118,17 @@ var self = {
             if (rows && rows.length > 0) {
                 _.forEach(rows, function(value, key) {
                     var lesson = _.find(lessonsList, { 'id': value.lessonId });
-                    lesson.files = lesson.files || [];
-                    lesson.files.push(value);
+                    if (lesson) {
+                        lesson.files = lesson.files || [];
+                        lesson.files.push(value);
+                    }
                 });
             }
         });
     },
     signup: function(request, connection, md5, callback) { /// for new user signup
-        var query = "INSERT INTO ??(??,??, ??, ??) VALUES (?,?, ?, ?)";
-        var queryValues = ["user", "email", "phone", "password", "fullName", request.email, request.phone, md5(request.password), request.fullName];
+        var query = "INSERT INTO ??(??,??, ??, ??, ??) VALUES (?,?, ?, ?, ?)";
+        var queryValues = ["user", "email", "phone", "password", "fullName", "profileType", request.email, request.phone, md5(request.password), request.fullName, request.profileType];
         query = mysql.format(query, queryValues);
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
@@ -178,6 +206,88 @@ var self = {
             });
         });
     },
+    savePaymentDetails: function(req, paymentInfo, connection, callback) {
+        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        var queryValues = ["payment_details", "payment_request_id", "phone", "purpose", "amount", "email", "fullName", "userId", "courseId", paymentInfo.id, req.phone, req.purpose, req.amt, req.email, req.fullName, req.userId, req.courseId];
+        query = mysql.format(query, queryValues);
+        connection.beginTransaction(function(err) {
+            if (err) {
+                callback(err);
+            }
+            connection.query(query, function(err, rows) {
+                if (err) {
+                    return connection.rollback(function() {
+                        callback({ "Error": true });
+                    });
+                }
+                query = "INSERT INTO ??(??, ??) values (?, ?)";
+                queryValues = ["payment_log", "payment_request_id", "status", paymentInfo.id, paymentInfo.status];
+                query = mysql.format(query, queryValues);
+                connection.query(query, function(err, rows) {
+                    if (err) {
+                        return connection.rollback(function() {
+                            callback({ "Error": true });
+                        });
+                    }
+                    connection.commit(function(err) {
+                        if (err) {
+                            return connection.rollback(function() {
+                                callback({ "Error": true });
+                            });
+                        }
+                        callback({ "Error": false });
+                    });
+                });
+            });
+        });
+    },
+    savePaymentStatus: function(request, connection, callback) {
+        var query, queryValues;
+        query = "INSERT INTO ??(??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?)";
+        queryValues = ["payment_log", "payment_request_id", "payment_id", "fees", "mac", "status", request.payment_request_id, request.payment_id, request.fees, request.mac, request.status];
+        query = mysql.format(query, queryValues);
+        connection.beginTransaction(function(err) {
+            if (err) {
+                callback(err);
+            }
+            connection.query(query, function(err, rows) {
+                if (err) {
+                    return connection.rollback(function() {
+                        callback({ "Error": true });
+                    });
+                }
+                if (request.status.toLowerCase() == 'credit') {
+                    query = "INSERT INTO ??(??, ??) SELECT courseId, userId FROM payment_details WHERE payment_request_id = ?";
+                    queryValues = ["course_subscription", "courseId", "userId", request.payment_request_id];
+                    query = mysql.format(query, queryValues);
+                    connection.query(query, function(err, rows) {
+                        if (err) {
+                            return connection.rollback(function() {
+                                callback({ "Error": true });
+                            });
+                        }
+                        connection.commit(function(err) {
+                            if (err) {
+                                return connection.rollback(function() {
+                                    callback({ "Error": true });
+                                });
+                            }
+                            callback({ "Error": false });
+                        });
+                    });
+                } else {
+                    connection.commit(function(err) {
+                        if (err) {
+                            return connection.rollback(function() {
+                                callback({ "Error": true });
+                            });
+                        }
+                        callback({ "Error": false });
+                    });
+                }
+            });
+        });
+    },
     addCourseWithUsers: function(query, request, connection, callback) { /// to add users to course
         var query = query,
             queryValues;
@@ -192,8 +302,13 @@ var self = {
                     });
                 }
                 var courseId = rows.insertId || request.id;
-                query = "DELETE FROM ?? where ?? = ?";
-                queryValues = ["courses_instructor", "courseId", courseId];
+                query = "INSERT INTO ??(??, ??, ??, ??) values ? ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted)";
+                queryValues = ["courses_instructor", "id", "courseId", "userId", "isDeleted"];
+                var values = [];
+                for (var i = 0; i < request.instructors.length; i++) {
+                    values.push([request.instructors[i].id, courseId, request.instructors[i].userId, (request.instructors[i].isDeleted == 'true')]);
+                }
+                queryValues.push(values);
                 query = mysql.format(query, queryValues);
                 connection.query(query, function(err, rows) {
                     if (err) {
@@ -201,28 +316,13 @@ var self = {
                             callback(err);
                         });
                     }
-                    query = "INSERT INTO ??(??, ??) values ?";
-                    queryValues = ["courses_instructor", "courseId", "userId"];
-                    var values = [];
-                    for (var i = 0; i < request.instructors.length; i++) {
-                        values.push([courseId, request.instructors[i].id]);
-                    }
-                    queryValues.push(values);
-                    query = mysql.format(query, queryValues);
-                    connection.query(query, function(err, rows) {
+                    connection.commit(function(err) {
                         if (err) {
                             return connection.rollback(function() {
                                 callback(err);
                             });
                         }
-                        connection.commit(function(err) {
-                            if (err) {
-                                return connection.rollback(function() {
-                                    callback(err);
-                                });
-                            }
-                            callback(err, rows, courseId);
-                        });
+                        callback(err, rows, courseId);
                     });
                 });
             });
@@ -232,10 +332,10 @@ var self = {
         var query, queryValues;
         if (request.id) {
             query = "UPDATE ?? SET ? where ?? = ?";
-            queryValues = ["courses", { "name": request.name, "description": request.description, "demo": request.demo, "filePath": request.filePath, "fileName": request.fileName }, "id", request.id];
+            queryValues = ["courses", { "name": request.name, "description": request.description, "demoVideo": request.demoVideo, "demoPoster": request.demoPoster, "filePath": request.filePath, "fileName": request.fileName, "isDeleted": request.isDeleted }, "id", request.id];
         } else {
             query = "INSERT INTO ??(??, ??, ??, ??, ??) values (?, ?, ?, ?, ?)";
-            queryValues = ["courses", "name", "description", "demo", "filePath", "fileName", request.name, request.description, request.demo, request.filePath, request.fileName];
+            queryValues = ["courses", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName];
         }
         query = mysql.format(query, queryValues);
         if (request.instructors && request.instructors.length > 0) {
@@ -248,7 +348,7 @@ var self = {
                 }
             });
         } else {
-            connection.query(query, function(err, rows) {
+            connection.query(query, function(err, rows, courseId) {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
@@ -258,8 +358,29 @@ var self = {
             });
         }
     },
+    searchCourse: function(type, request, connection, callback) {
+        var query, queryValues;
+        if (type == "byName") {
+            query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId WHERE c.isDeleted = false AND c.name LIKE '%" + request.name + "%' GROUP BY c.id";
+            queryValues = ["courses"];
+        }
+        query = mysql.format(query, queryValues);
+        connection.query(query, function(err, rows) {
+            if (err) {
+                callback({ "Error": true, "Message": err });
+            } else {
+                var result = [];
+                _.forEach(rows, function(value, key) {
+                    var course = _.find(coursesList, { 'id': value.id });
+                    course.duration = value.courseDuration;
+                    result.push(course);
+                });
+                callback({ "Error": false, "Message": "Success", "courses": result });
+            }
+        });
+    },
     getCourseById: function(request, connection, callback) {
-        var query = "SELECT u.*, sum(l.duration) as unitDuration from ?? u LEFT JOIN (tutorialsdb.course_unit_lesson_r cul, tutorialsdb.lessons l) on u.id = cul.unitId and l.id = cul.lessonId where u.courseId = ? group by u.id";
+        var query = "SELECT u.*, sum(l.duration) as unitDuration from ?? u LEFT JOIN (tutorialsdb.course_unit_lesson_r cul, tutorialsdb.lessons l) on u.id = cul.unitId and l.id = cul.lessonId where u.isDeleted = false AND u.courseId = ? group by u.id";
         var queryValues = ["units", request.courseId];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
@@ -298,13 +419,13 @@ var self = {
     getAllCourses: function(type, id, connection, callback) { /// get list of course(all/subscribed/unsubscribed)
         var query, queryValues;
         if (type == "all") {
-            query = "SELECT c.id, GROUP_CONCAT(ci.userId) as instructorList, sum(l.duration) as courseDuration from ?? c LEFT JOIN (courses_instructor ci) ON c.id = ci.courseId LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId GROUP BY c.id";
+            query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId WHERE c.isDeleted = false GROUP BY c.id";
             queryValues = ["courses"];
         } else if (type == "subscribed") {
-            query = "SELECT c.id, GROUP_CONCAT(ci.userId) as instructorList, sum(l.duration) as courseDuration from ?? c LEFT JOIN (courses_instructor ci) ON c.id = ci.courseId LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.id IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
+            query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.isDeleted = false AND c.id IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
             queryValues = ["courses", "courseId", "userId", id];
         } else if (type == "unsubscribed") {
-            query = "SELECT c.id, GROUP_CONCAT(ci.userId) as instructorList, sum(l.duration) as courseDuration from ?? c LEFT JOIN (courses_instructor ci) ON c.id = ci.courseId LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.id NOT IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
+            query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.isDeleted = false AND c.id NOT IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
             queryValues = ["courses", "courseId", "userId", id];
         }
         query = mysql.format(query, queryValues);
@@ -316,17 +437,6 @@ var self = {
                 _.forEach(rows, function(value, key) {
                     var course = _.find(coursesList, { 'id': value.id });
                     course.duration = value.courseDuration;
-                    course.instructors = [];
-                    if (value.instructorList) {
-                    	var instructorList = _.uniq(value.instructorList.split(","));
-                        _.forEach(instructorList, function(childValue, childKey) {
-                            var user = _.find(usersList, { 'id': parseInt(childValue) });
-                            if (user) {
-                                delete user.password;
-                                course.instructors.push(user);
-                            }
-                        });
-                    }
                     result.push(course);
                 });
                 callback({ "Error": false, "Message": "Success", "courses": result });
@@ -340,11 +450,11 @@ var self = {
             return !o.id;
         });
         if (request && request.length > 0) {
-            query = "INSERT INTO ??(??, ??, ??, ??) values ? ON DUPLICATE KEY UPDATE name=VALUES(name), courseId=VALUES(courseId)";
-            queryValues = ["units", "id", "name", "description", "courseId"];
+            query = "INSERT INTO ??(??, ??, ??, ??, ??) values ? ON DUPLICATE KEY UPDATE name=VALUES(name), courseId=VALUES(courseId), isDeleted=VALUES(isDeleted)";
+            queryValues = ["units", "id", "name", "description", "courseId", "isDeleted"];
             var values = [];
             for (var i = 0; i < request.length; i++) {
-                values.push([request[i].id, request[i].name, request[i].name, courseId]);
+                values.push([request[i].id, request[i].name, request[i].name, courseId, (request[i].isDeleted == 'true')]);
             }
             queryValues.push(values);
             query = mysql.format(query, queryValues);
@@ -361,7 +471,7 @@ var self = {
     getAllUnits: function(type, id, connection, callback) { /// get list of units(by course id)
         var query, queryValues;
         if (type == 'byCourseId') {
-            query = "SELECT u.*, GROUP_CONCAT(cul.lessonId) as lessonList from ?? u LEFT JOIN (course_unit_lesson_r cul) ON u.id = cul.unitId where u.courseId = ? GROUP BY u.id";
+            query = "SELECT u.*, GROUP_CONCAT(cul.lessonId) as lessonList from ?? u LEFT JOIN (course_unit_lesson_r cul) ON u.id = cul.unitId where u.courseId = ? AND u.isDeleted = false GROUP BY u.id";
             queryValues = ["units", id];
         }
         query = mysql.format(query, queryValues);
@@ -387,8 +497,8 @@ var self = {
     },
     addUpdateLesson: function(request, connection, callback) { /// add update lesson
         var query, queryValues;
-        query = "INSERT INTO ??(??, ??, ??, ??, ??) values (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description), video=VALUES(video), duration=VALUES(duration)";
-        queryValues = ["lessons", "id", "name", "description", "video", "duration", request.id, request.name, request.description, request.video, request.duration];
+        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description), video=VALUES(video), duration=VALUES(duration), isDeleted=VALUES(isDeleted), poster=VALUES(poster)";
+        queryValues = ["lessons", "id", "name", "description", "video", "duration", "isDeleted", "poster", request.id, request.name, request.description, request.video, request.duration, request.isDeleted, request.poster];
         query = mysql.format(query, queryValues);
         connection.beginTransaction(function(err) {
             if (err) {
@@ -417,6 +527,7 @@ var self = {
                                     callback({ "Error": true, "Message": err });
                                 });
                             }
+                            self.getLessonsList(connection);
                             callback({ "Error": false, "Message": "Lesson added", "lessonId": lessonId });
                         });
                     });
@@ -427,6 +538,7 @@ var self = {
                                 callback({ "Error": true, "Message": err });
                             });
                         }
+                        self.getLessonsList(connection);
                         callback({ "Error": false, "Message": "Lesson added", "lessonId": lessonId });
                     });
                 }
@@ -442,11 +554,11 @@ var self = {
         }
         queryValues.push(values);
         query = mysql.format(query, queryValues);
-        connection.query(query, function(err, rows){
-        	if (err) {
+        connection.query(query, function(err, rows) {
+            if (err) {
                 callback({ "Error": true, "Message": err });
             } else {
-                self.getLessonsList(connection);
+                self.getLessonsFiles(connection);
                 callback({ "Error": false, "Message": "Success" });
             }
         });
@@ -460,13 +572,15 @@ var self = {
                 callback({ "Error": true, "Message": err });
             } else {
                 var result = _.cloneDeep(_.find(lessonsList, { 'id': request.lessonId }));
-                result.courses = [];
-                if (rows && rows.length > 0) {
-                    _.forEach(rows, function(value, key) {
-                        value.courseName = _.cloneDeep(_.find(coursesList, { 'id': value.courseId }).name);
-                        value.unitName = _.cloneDeep(_.find(unitsList, { 'id': value.unitId }).name);
-                        result.courses.push(value);
-                    });
+                if (result) {
+                    result.courses = [];
+                    if (rows && rows.length > 0) {
+                        _.forEach(rows, function(value, key) {
+                            value.courseName = _.cloneDeep(_.find(coursesList, { 'id': value.courseId }).name);
+                            value.unitName = _.cloneDeep(_.find(unitsList, { 'id': value.unitId }).name);
+                            result.courses.push(value);
+                        });
+                    }
                 }
                 callback({ "Error": false, "Message": "Success", "lesson": result });
             }
@@ -490,6 +604,16 @@ var self = {
             }
         });
     },
+    getCommentOnLesson: function(request, connection, callback) { /// get lesson comments by id
+        var lesson = _.find(lessonsList, { 'id': request.lessonId });
+        var comments = [];
+        if (lesson) {
+            comments = lesson.comments;
+            callback({ "Error": false, "Message": "Success", "comments": comments });
+        } else {
+            callback({ "Error": true, "Message": "Comments Not Found" });
+        }
+    },
     getAllCategories: function(type, id, connection, callback) { /// get list of all category
         var query, queryValues;
         if (type = "all") {
@@ -506,16 +630,16 @@ var self = {
         });
     },
     addCategories: function(request, connection, callback) {
-    	var query = "INSERT INTO ??(??) VALUES (?)";
-    	var queryValues = ["categories", "name", request.name];
-    	query = mysql.format(query, queryValues);
-    	connection.query(query, function (err, rows) {
-    		if (err) {
+        var query = "INSERT INTO ??(??) VALUES (?)";
+        var queryValues = ["categories", "name", request.name];
+        query = mysql.format(query, queryValues);
+        connection.query(query, function(err, rows) {
+            if (err) {
                 callback({ "Error": true, "Message": err });
             } else {
                 callback({ "Error": false, "Message": "Success" });
             }
-    	})
+        })
     }
 };
 

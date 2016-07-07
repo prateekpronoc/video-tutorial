@@ -32,10 +32,9 @@
                             </button>
                         </div>
                         <div class="col-md-8 col-xs-8 text-right">
-                            <a href="https://www.instamojo.com/Flavido/forumias-mains-test-series/" rel="im-checkout" data-behaviour="link" data-style="light" data-text="Checkout With Instamojo" data-token="c599eda8489c718db36fe146f134fb9a"></a>
-                            <!-- <button type="button" class="btn btn-default btn-sm">
-                                <i class="fa fa-credit-card" aria-hidden="true"></i> Subscribe Now
-                            </button> -->
+                            <button type="button" class="btn btn-default btn-sm" ng-click="vm.subscribeCourse(course)">
+                                <i class="fa fa-credit-card" aria-hidden="true"></i> Subscribe Now @ <i class="fa fa-inr" aria-hidden="true"></i> <span ng-bind="course.subscriptionFee"></span>
+                            </button>
                         </div>
                     </div>
                 </div>

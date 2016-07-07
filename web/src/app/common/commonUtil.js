@@ -5,16 +5,42 @@
         .module('web')
         .factory('CommonInfo', CommonInfo)
         .factory('credentials', credentials)
-        .factory('Modal', Modal);
+        .factory('Modal', Modal)
+        .directive('jwplayerjs', jwplayerjs);
 
     /** @ngInject */
-    function CommonInfo($localStorage) {
+    function jwplayerjs($compile) {
+        return {
+            restrict: 'EC',
+            scope: {
+                playerId: '@',
+                setupVars: '=setup'
+
+            },
+            link: function(scope, element, attrs) {
+                var id = scope.playerId || 'random_player_' + Math.floor((Math.random() * 999999999) + 1),
+                    getTemplate = function(playerId) {
+                        return '<div id="' + playerId + '"></div>';
+                    };
+
+                element.html(getTemplate(id));
+                $compile(element.contents())(scope);
+                jwplayer(id).setup(scope.setupVars);
+            }
+        };
+    }
+
+    /** @ngInject */
+    function CommonInfo($localStorage, $state) {
         return {
             getInfoObj: function() {
                 return angular.copy($localStorage.infoObj);
             },
             getInfo: function(item) {
-                return angular.copy($localStorage.infoObj[item]);
+                if (!$localStorage.infoObj || !$localStorage.infoObj.user)
+                    $state.go('login');
+                else
+                    return angular.copy($localStorage.infoObj[item]);
             },
             setInfo: function(item, value) {
                 var obj = $localStorage.infoObj || {};
@@ -25,7 +51,7 @@
                 $localStorage.$reset();
             },
             getAppUrl: function() {
-                return 'http://192.168.0.109:3000';
+                return 'http://localhost:3000';
             }
         };
     }
@@ -34,7 +60,8 @@
     function credentials(CommonInfo) {
         return {
             getCredentials: function() {
-                var userType = CommonInfo.getInfo('user').profileType;
+                if(CommonInfo.getInfo('user'))
+                    var userType = CommonInfo.getInfo('user').profileType;
                 var config = {};
                 switch (userType) {
                     case 'admin':

@@ -18,13 +18,17 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="lesson.description">Description</label>
-                    <textarea class="form-control" id="lesson.description" placeholder="Description" ng-model="vm.lesson.description"></textarea>
+                    <textarea class="form-control" id="lesson.description" placeholder="Description" ng-model="vm.lesson.description" rows="5"></textarea>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="lesson.video">Video Link</label>
-                    <textarea class="form-control" id="lesson.video" placeholder="Video Link" ng-model="vm.lesson.video"></textarea>
+                    <input type="text" class="form-control" id="lesson.video" placeholder="Video Link" ng-model="vm.lesson.video" />
+                </div>
+                <div class="form-group">
+                    <label for="lesson.poster">Video Poster</label>
+                    <input type="text" class="form-control" id="lesson.poster" placeholder="Video Poster" ng-model="vm.lesson.poster" />
                 </div>
             </div>
         </div>
