@@ -51,7 +51,7 @@
                 $localStorage.$reset();
             },
             getAppUrl: function() {
-                return 'http://http://52.66.77.5/';
+                return 'http://52.66.77.5';
             }
         };
     }
