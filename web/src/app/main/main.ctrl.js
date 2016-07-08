@@ -209,19 +209,19 @@
 
         function selectLesson(lesson) {
             vm.lesson = lesson
-            if(lesson.video){
-            vm.lesson.options = {
-                file: lesson.video,
-                image: lesson.poster,
-                type: 'hls',
-                androidhls: 'true',
-                width: '100%',
-                player: 'html5',
-                aspectratio: '16:9'
+            if (lesson.video) {
+                vm.lesson.options = {
+                    file: lesson.video,
+                    image: lesson.poster,
+                    type: 'hls',
+                    androidhls: 'true',
+                    width: '100%',
+                    player: 'html5',
+                    aspectratio: '16:9'
+                }
+            } else {
+                vm.lesson.options = null;
             }
-        } else {
-            vm.lesson.options = null;
-        }
         }
 
         function getAllLessons() {
@@ -557,15 +557,15 @@
             }
         }
 
-        function downloadFile(filePath, fileName){
-            var data ={
+        function downloadFile(filePath, fileName) {
+            var data = {
                 fileName: fileName,
                 filePath: filePath,
                 userId: vm.userInfo.id
             };
-            $http.post(CommonInfo.getAppUrl() + '/api/util/downloadFile', data).then(function(response){
+            $http.post(CommonInfo.getAppUrl() + '/api/util/downloadFile', data).then(function(response) {
                 console.log(response);
-            }, function(response){});
+            }, function(response) {});
         }
 
         function showCategoryModal() {
