@@ -67,7 +67,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
 
     router.put("/user", imgUpload, function(req, res) { /// user update router
         if (req && req.files && req.files.file && req.files.file.path)
-            req.body.user.profilePhoto = req.protocol + '://' + req.get('host') + req.files.file.path.substring(req.files.file.path.indexOf('\\'));
+            req.body.user.profilePhoto = req.protocol + '://' + req.get('host') + '/' + req.files.file.path.substring(req.files.file.path.indexOf('\\'));
         queryHelper.updateUser(req.body.user, connection, function(result) {
             res.json(result);
         });
@@ -75,7 +75,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
     /* courses releated routes started */
     router.post("/course", fileUpload, function(req, res) { /// add or update courses with or without instructor
         if (req && req.files && req.files.file && req.files.file.path) {
-            req.body.course.filePath = req.protocol + '://' + req.get('host') + req.files.file.path.substring(req.files.file.path.indexOf('\\'));
+            req.body.course.filePath = req.protocol + '://' + req.get('host') + '/' + req.files.file.path.substring(req.files.file.path.indexOf('\\'));
             req.body.course.fileName = req.files.file.name;
         }
         queryHelper.addUpdateCourse(req.body.course, connection, function(result) {
