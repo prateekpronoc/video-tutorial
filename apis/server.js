@@ -42,9 +42,7 @@ Apis.prototype.configureExpress = function(connection) {
 }
 
 Apis.prototype.startServer = function() {
-    app.listen(3000, function() {
-        console.log("All right ! I am alive at Port 3000.");
-    });
+    app.listen(3000);
 }
 
 Apis.prototype.stop = function(err) {
