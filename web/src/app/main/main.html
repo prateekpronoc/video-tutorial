@@ -19,7 +19,7 @@
                     <img ng-src="{{vm.userInfo.profilePhoto || 'assets/images/defaultProfileImg.png'}}" style="width:50px;border:1px solid gainsboro;" class="img-responsive center-block img-circle" id="simple-dropdown" uib-dropdown-toggle>
                     <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
                         <li ng-repeat="choice in items">
-                            <li role="menuitem" ng-click="vm.editUser('update', vm.userInfo)"><a href="javascript:void(0);vm.isCollapsed=false">Edit Profile</a></li>
+                            <li role="menuitem" ng-click="vm.editUser('update', vm.userInfo);vm.isCollapsed = !vm.isCollapsed;"><a href="javascript:void(0);">Edit Profile</a></li>
                             <li class="divider"></li>
                             <li role="menuitem" ng-click="vm.signout()"><a href="javascript:void(0);">Sign Out</a></li>
                         </li>
@@ -29,39 +29,39 @@
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Search courses by name.." ng-model="vm.searchText" />
                         <span class="input-group-btn">
-                          <button class="btn btn-default" type="button" ng-click="vm.searchCourse()">Go!</button>
+                          <button class="btn btn-default" type="button" ng-click="vm.searchCourse();vm.isCollapsed = !vm.isCollapsed;">Go!</button>
                         </span>
                     </div>
                 </form>
                 <!-- project menu -->
                 <ul class="nav navbar-nav navbar-left">
                     <li ui-sref="main.libary" ui-sref-active="active" ng-if="vm.config.tabs.library">
-                        <a href="javascript:void(0);" ng-click="vm.getAllCourses();">
+                        <a href="javascript:void(0);" ng-click="vm.getAllCourses();vm.isCollapsed = !vm.isCollapsed;">
                             <i class="fa fa-database fa-fw" aria-hidden="true"></i> Library
                         </a>
                     </li>
                     <li ui-sref="main.myCourses" ui-sref-active="active" ng-if="vm.config.tabs.myCourses">
-                        <a href="javascript:void(0);" ng-click="vm.getMyCourses()">
+                        <a href="javascript:void(0);" ng-click="vm.getMyCourses();vm.isCollapsed = !vm.isCollapsed;">
                             <i class="fa fa-clone fa-fw" aria-hidden="true"></i> My Courses
                         </a>
                     </li>
                     <li ui-sref="main.courses" ui-sref-active="active" ng-if="vm.config.tabs.allCourses">
-                        <a href="javascript:void(0);" ng-click="vm.getAllCourses();">
+                        <a href="javascript:void(0);" ng-click="vm.getAllCourses();vm.isCollapsed = !vm.isCollapsed;">
                             <i class="fa fa-database fa-fw" aria-hidden="true"></i> Courses
                         </a>
                     </li>
                     <li ui-sref="main.lessons" ui-sref-active="active" ng-if="vm.config.tabs.allLessons">
-                        <a href="javascript:void(0);" ng-click="vm.getAllLessons()">
+                        <a href="javascript:void(0);" ng-click="vm.getAllLessons();vm.isCollapsed = !vm.isCollapsed;">
                             <i class="fa fa-clone fa-fw" aria-hidden="true"></i> Lessons
                         </a>
                     </li>
                     <li ui-sref="main.instructors" ui-sref-active="active" ng-if="vm.config.tabs.instructor">
-                        <a href="javascript:void(0);" ng-click="vm.getUsers('instructor')">
+                        <a href="javascript:void(0);" ng-click="vm.getUsers('instructor');vm.isCollapsed = !vm.isCollapsed;">
                             <i class="fa fa-user fa-fw" aria-hidden="true"></i> Instructors
                         </a>
                     </li>
                     <li ui-sref="main.students" ui-sref-active="active" ng-if="vm.config.tabs.students">
-                        <a href="javascript:void(0);" ng-click="vm.getUsers('student')">
+                        <a href="javascript:void(0);" ng-click="vm.getUsers('student');vm.isCollapsed = !vm.isCollapsed;">
                             <i class="fa fa-users fa-fw" aria-hidden="true"></i> Students
                         </a>
                     </li>
