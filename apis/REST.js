@@ -96,9 +96,9 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
             amount: req.body.amt,
             phone: req.body.phone,
             buyer_name: req.body.fullName,
-            redirect_url: 'http://www.example.com/redirect/',
+            redirect_url: 'http://52.66.78.88/#/main/libary',
             send_email: false,
-            webhook: 'https://kohwxpghzl.localtunnel.me/api/course/payment',
+            webhook: 'http://52.66.77.5/api/course/payment',
             send_sms: false,
             email: req.body.email,
             allow_repeated_payments: false
