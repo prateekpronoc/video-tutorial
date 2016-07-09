@@ -12,7 +12,7 @@ function REST_ROUTER(router, connection, md5, jwt, imgUpload, fileUpload) {
 REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgUpload, fileUpload) {
     queryHelper.initdictionaries(connection);
     router.get("/", function(req, res) { /// base route not for use
-        res.json({ "Message": "Hello World ! by node" });
+        res.json({ "Message": "Hello World ! by node " });
     });
 
     router.post("/user", function(req, res) { /// user signup route
