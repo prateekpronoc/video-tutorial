@@ -19,7 +19,7 @@
                     <img ng-src="{{vm.userInfo.profilePhoto || 'assets/images/defaultProfileImg.png'}}" style="width:50px;border:1px solid gainsboro;" class="img-responsive center-block img-circle" id="simple-dropdown" uib-dropdown-toggle>
                     <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
                         <li ng-repeat="choice in items">
-                            <li role="menuitem" ng-click="vm.editUser('update', vm.userInfo)"><a href="javascript:void(0);">Edit Profile</a></li>
+                            <li role="menuitem" ng-click="vm.editUser('update', vm.userInfo)"><a href="javascript:void(0);vm.isCollapsed=false">Edit Profile</a></li>
                             <li class="divider"></li>
                             <li role="menuitem" ng-click="vm.signout()"><a href="javascript:void(0);">Sign Out</a></li>
                         </li>
