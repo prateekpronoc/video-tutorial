@@ -67,7 +67,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
 
     router.put("/user", imgUpload, function(req, res) { /// user update router
         if (req && req.files && req.files.file && req.files.file.path)
-            req.body.user.profilePhoto = req.protocol + '://' + req.get('host') + req.files.file.path.substring(req.files.file.path.indexOf('\\'));
+            req.body.user.profilePhoto = req.protocol + '://' + req.get('host') + '/' + req.files.file.path.substring(req.files.file.path.indexOf('\/'));
         queryHelper.updateUser(req.body.user, connection, function(result) {
             res.json(result);
         });
