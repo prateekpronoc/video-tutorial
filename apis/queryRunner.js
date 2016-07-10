@@ -330,13 +330,8 @@ var self = {
     },
     addUpdateCourse: function(request, connection, callback) { /// update or add course
         var query, queryValues;
-        if (request.id) {
-            query = "UPDATE ?? SET ? where ?? = ?";
-            queryValues = ["courses", { "name": request.name, "description": request.description, "demoVideo": request.demoVideo, "demoPoster": request.demoPoster, "filePath": request.filePath, "fileName": request.fileName, "isDeleted": request.isDeleted }, "id", request.id];
-        } else {
-            query = "INSERT INTO ??(??, ??, ??, ??, ??) values (?, ?, ?, ?, ?)";
-            queryValues = ["courses", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName];
-        }
+            query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName)";
+            queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, request.isDeleted];
         query = mysql.format(query, queryValues);
         if (request.instructors && request.instructors.length > 0) {
             self.addCourseWithUsers(query, request, connection, function(err, rows, courseId) {
