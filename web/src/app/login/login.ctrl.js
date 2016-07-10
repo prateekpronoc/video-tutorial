@@ -34,9 +34,6 @@
                 $http.post(CommonInfo.getAppUrl() + "/api/login", vm.user).then(
                     function(response) {
                         if (response && response.data && response.data.result) {
-                            // if (response.data.result.profilePhoto) {
-                            //     response.data.result.profilePhoto = CommonInfo.getAppUrl() + response.data.result.profilePhoto;
-                            // }
                             CommonInfo.setInfo('user', response.data.result);
                             var profileType = response.data.result.profileType;
                             if (profileType == 'student')
@@ -46,7 +43,7 @@
                         }
                     },
                     function(response) {
-                        console.log(response.data);
+                        growl.info(response.data.Message);
                     }
                 );
             }
