@@ -158,7 +158,7 @@
                     phone: vm.userInfo.phone,
                     fullName: vm.userInfo.fullName,
                     email: vm.userInfo.email,
-                    purpose: 'Subscription: ' + vm.userInfo.fullName + ' for ' + course.name,
+                    purpose: 'Payment stud: ' + vm.userInfo.id + 'cour: ' + course.id,
                     amt: course.subscriptionFee,
                     userId: vm.userInfo.id,
                     courseId: course.id
