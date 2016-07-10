@@ -177,13 +177,15 @@ var self = {
         connection.query(query, function(err, rows) {
             if (err) {
                 callback({ "Error": true, "Message": "Error executing MySQL query" });
-            } else {
+            } else if(rows && rows.length > 0) {
                 var token = jwt.sign(rows[0], request.secretString, {
                     expiresIn: "1d" // expires in 24 hours
                 });
                 rows = rows[0];
                 delete rows.password;
                 callback({ "Error": false, "Message": "Success", "token": token, "result": rows });
+            } else {
+                callback({ "Error": true, "Message": "You donot have account with us try to signin" });
             }
         });
     },
