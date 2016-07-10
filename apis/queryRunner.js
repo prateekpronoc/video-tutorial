@@ -126,16 +126,46 @@ var self = {
             }
         });
     },
-    signup: function(request, connection, md5, callback) { /// for new user signup
-        var query = "INSERT INTO ??(??,??, ??, ??, ??) VALUES (?,?, ?, ?, ?)";
-        var queryValues = ["user", "email", "phone", "password", "fullName", "profileType", request.email, request.phone, md5(request.password), request.fullName, request.profileType];
-        query = mysql.format(query, queryValues);
+    findUser: function(request, connection, callback) {
+        request.email = request.email || null;
+        request.phone = request.phone || null;
+        var query = "SELECT id FROM ?? WHERE ??=? or ??=?";
+        var queryValues = ["user", "email", request.email, "phone", request.phone];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
             if (err) {
                 callback({ "Error": true, "Message": err });
+            } else if (rows && rows.length > 0) {
+                callback({ "Error": false, "Message": "User Present", "Code": 1 });
             } else {
-                callback({ "Error": false, "Message": "User Added" });
+                callback({ "Error": false, "Message": "User Not Present", "Code": 0 });
+            }
+        });
+    },
+    signup: function(request, connection, md5, callback) { /// for new user signup
+        var query, queryValues;
+        var data = {
+            email: request.email,
+            phone: request.phone
+        };
+        self.findUser(data, connection, function(result) {
+            console.log(result);
+            if (result && !result.Error && !result.Code) {
+                query = "INSERT INTO ??(??,??, ??, ??, ??) VALUES (?,?, ?, ?, ?)";
+                queryValues = ["user", "email", "phone", "password", "fullName", "profileType", request.email, request.phone, md5(request.password), request.fullName, request.profileType];
+                query = mysql.format(query, queryValues);
+                query = mysql.format(query, queryValues);
+                connection.query(query, function(err, rows) {
+                    if (err) {
+                        callback({ "Error": true, "Message": err });
+                    } else {
+                        callback({ "Error": false, "Message": "User Added" });
+                    }
+                });
+            } else if (result && !result.Error && result.Code) {
+                callback({ "Error": true, "Message": "User alreay exixts" });
+            } else {
+                callback({ "Error": true, "Message": "Error occured, Please try after some time" });
             }
         });
     },
@@ -330,8 +360,8 @@ var self = {
     },
     addUpdateCourse: function(request, connection, callback) { /// update or add course
         var query, queryValues;
-            query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName)";
-            queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, request.isDeleted];
+        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName)";
+        queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, request.isDeleted];
         query = mysql.format(query, queryValues);
         if (request.instructors && request.instructors.length > 0) {
             self.addCourseWithUsers(query, request, connection, function(err, rows, courseId) {

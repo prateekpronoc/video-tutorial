@@ -61,6 +61,8 @@
                             growl.success('Signup successfuly');
                             vm.newUser = {};
                             vm.activeForm = 0;
+                        } else if(response && response.data && response.data.Error){
+                            growl.info(response.data.Message);
                         }
                     },
                     function(response) {
