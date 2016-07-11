@@ -17,6 +17,7 @@
     "multer": "^1.1.0",
     "mysql": "~2.5.5",
     "node-qpdf": "^1.0.2",
+    "nodemailer": "^2.5.0",
     "passport": "^0.3.0",
     "passport-jwt": "^1.2.1",
     "request": "^2.72.0"

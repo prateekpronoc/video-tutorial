@@ -6,9 +6,13 @@
         .controller('LoginController', LoginController);
 
     /** @ngInject */
-    function LoginController($http, $state, CommonInfo, growl) {
+    function LoginController($http, $state, CommonInfo, growl, $location) {
         var vm = this;
 
+        vm.forget = {
+            status: false,
+            email: ''
+        };
         vm.user = {
             email: '',
             password: ''
@@ -22,6 +26,7 @@
 
         vm.login = login;
         vm.signup = signup;
+        vm.forgetPassword = forgetPassword;
 
         activate();
 
@@ -40,7 +45,7 @@
                                 $state.go('main.libary');
                             else if (profileType == 'admin')
                                 $state.go('main.courses');
-                        } else if(response && response.data && response.data.Error) {
+                        } else if (response && response.data && response.data.Error) {
                             growl.info(response.data.Message);
                         }
                     },
@@ -49,7 +54,7 @@
                     }
                 );
             }
-        };
+        }
 
         function signup() {
             if (vm.newUser.email && vm.newUser.phone && vm.newUser.fullName) {
@@ -58,9 +63,13 @@
                     function(response) {
                         if (response && response.data && !response.data.Error) {
                             growl.success('Signup successfuly');
+                            vm.user = vm.newUser;
+                            vm.forget = {
+                                status: false
+                            };
                             vm.newUser = {};
                             vm.activeForm = 0;
-                        } else if(response && response.data && response.data.Error){
+                        } else if (response && response.data && response.data.Error) {
                             growl.info(response.data.Message);
                         }
                     },
@@ -69,6 +78,25 @@
                     }
                 );
             }
-        };
+        }
+
+        function forgetPassword() {
+            if ($location.absUrl()) {
+                var url = $location.absUrl().substring(0, $location.absUrl().indexOf('#') + 2);
+                vm.forget.host = url;
+                $http.post(CommonInfo.getAppUrl() + "/api/forget", vm.forget).then(
+                    function(response) {
+                        if (response && response.data && !response.data.Error) {
+                            growl.success('mail send');
+                        } else if (response && response.data && response.data.Error) {
+                            growl.info(response.data.Message);
+                        }
+                    },
+                    function(response) {
+                        growl.info('Mail not send, try after some time');
+                    }
+                );
+            }
+        }
     }
 })();

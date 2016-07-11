@@ -93,7 +93,7 @@
             <div class=" well">
                 <uib-tabset active="vm.activeForm">
                     <uib-tab index="0" heading="Login">
-                        <form style="margin-top:15px;">
+                        <form style="margin-top:15px;" ng-if="!vm.forget.status">
                             <div class="form-group">
                                 <label for="profile.email">Email or Phone number</label>
                                 <input type="text" class="form-control" id="profile.email" placeholder="Email or Phone number" ng-model="vm.user.email" />
@@ -101,8 +101,23 @@
                             <div class="form-group">
                                 <label for="profile.password">Password</label>
                                 <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" ng-keyup="$event.keyCode == 13 && vm.login()" />
+                                <div class="text-right">
+                                    <a href="javascript:void(0);" ng-click="vm.forget.status = true;">Forget password!</a>
+                                </div>
                             </div>
-                            <input class="btn btn-default pull-right" type="button" ng-click="vm.login()" value="Login">
+                            <div class="form-group">
+                                <input class="btn btn-default pull-right" type="button" ng-click="vm.login()" value="Login">
+                            </div>
+                            <div class="clearfix"></div>
+                        </form>
+                        <form style="margin-top:15px;" ng-if="vm.forget.status">
+                            <div class="form-group">
+                                <label for="profile.email">Email</label>
+                                <input type="text" class="form-control" id="profile.email" placeholder="Email" ng-model="vm.forget.email" />
+                            </div>
+                            <div class="form-group">
+                                <input class="btn btn-default pull-right" type="button" ng-click="vm.forgetPassword();" value="Send Request">
+                            </div>
                             <div class="clearfix"></div>
                         </form>
                     </uib-tab>

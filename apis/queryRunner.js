@@ -1,5 +1,8 @@
 var mysql = require("mysql");
 var _ = require("lodash");
+var nodemailer = require('nodemailer');
+var async = require('async');
+var crypto = require('crypto');
 var usersList = coursesList = lessonsList = unitsList = [];
 
 var self = {
@@ -177,7 +180,7 @@ var self = {
         connection.query(query, function(err, rows) {
             if (err) {
                 callback({ "Error": true, "Message": "Error executing MySQL query" });
-            } else if(rows && rows.length > 0) {
+            } else if (rows && rows.length > 0) {
                 var token = jwt.sign(rows[0], request.secretString, {
                     expiresIn: "1d" // expires in 24 hours
                 });
@@ -187,6 +190,65 @@ var self = {
             } else {
                 callback({ "Error": true, "Message": "Email/Phone or Password is in correct" });
             }
+        });
+    },
+    forgetPassword: function(req, request, connection, callback) {
+        async.waterfall([
+            function(done) {
+                crypto.randomBytes(20, function(err, buf) {
+                    var token = buf.toString('hex');
+                    done(err, token);
+                });
+            },
+            function(token, done) {
+                var query = "SELECT id from ?? where email=?";
+                var queryValues = ["user", request.email];
+                query = mysql.format(query, queryValues);
+                connection.query(query, function(err, rows) {
+                    if (rows && rows.length > 0) {
+                        var user = rows[0];
+
+                        user.resetPasswordToken = token;
+                        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+                        //user.save(function(err) {
+                            done(err, token, user);
+                        //});
+                    } else if (rows && rows.length == 0) {
+                        callback({ "Error": true, "Message": "No account with that email address exists" });
+                    } else {
+                        callback({ "Error": true, "Message": "Some error occured, Please try again after some time" });
+                    }
+                });
+            },
+            function(token, user, done) {
+                var transporter = nodemailer.createTransport({
+                    service: 'Gmail',
+                    auth: {
+                        user: 'rohan@stellardigital.in', // Your email id
+                        pass: '123rohan' // Your password
+                    }
+                });
+                var mailOptions = {
+                    from: 'rohan@stellardigital.in', // sender address
+                    to: request.email, // list of receivers
+                    subject: 'Email Example', // Subject line
+                    text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+                        'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+                        'http://' + request.host + '/reset/' + token + '\n\n' +
+                        'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+                };
+                transporter.sendMail(mailOptions, function(err, info) {
+                    if (err) {
+                        callback({ "Error": true, "Message": err });
+                    } else {
+                        callback({ "Error": false, "Message": "Success", "Info": info });
+                    };
+                });
+            }
+        ], function(err) {
+            if (err)
+                callback({ "Error": true, "Message": err });
         });
     },
     getProfile: function(request, connection, callback) { /// get user info by id

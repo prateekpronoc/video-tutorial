@@ -28,6 +28,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
         });
     });
 
+    router.post("/forget", function(req, res){
+        queryHelper.forgetPassword(req, req.body, connection, function(result) {
+            res.json(result);
+        });
+    });
+
     //    router.use(function(req, res, next) {
     //        // check header or url parameters or post parameters for token
     //        var token = req.body.token || req.query.token || req.headers['x-access-token'];
