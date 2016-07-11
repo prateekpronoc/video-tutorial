@@ -33,13 +33,15 @@
             if (vm.user.email && vm.user.password) {
                 $http.post(CommonInfo.getAppUrl() + "/api/login", vm.user).then(
                     function(response) {
-                        if (response && response.data && response.data.result) {
+                        if (response && response.data && response.data.result && !response.data.Error) {
                             CommonInfo.setInfo('user', response.data.result);
                             var profileType = response.data.result.profileType;
                             if (profileType == 'student')
                                 $state.go('main.libary');
                             else if (profileType == 'admin')
                                 $state.go('main.courses');
+                        } else if(response && response.data && response.data.Error) {
+                            growl.info(response.data.Message);
                         }
                     },
                     function(response) {

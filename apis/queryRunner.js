@@ -163,7 +163,7 @@ var self = {
                     }
                 });
             } else if (result && !result.Error && result.Code) {
-                callback({ "Error": true, "Message": "User alreay exixts" });
+                callback({ "Error": true, "Message": "Email/Phone already in use" });
             } else {
                 callback({ "Error": true, "Message": "Error occured, Please try after some time" });
             }

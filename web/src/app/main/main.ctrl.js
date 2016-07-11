@@ -93,6 +93,10 @@
                 } else if ($state.is('main.myLessons')) {
                     var course = CommonInfo.getInfo('course');
                     getUnits(course.id);
+                } else if ($state.is('main.profile')) {
+                    var user = angular.copy(vm.userInfo);
+                    if (user && user.id)
+                        editUser('update', user);
                 }
             } else if (vm.userInfo && vm.userInfo.profileType == 'admin') {
                 if ($state.is('main.courses')) {
@@ -122,6 +126,10 @@
                     var user = CommonInfo.getInfo('editUser');
                     if (user && user.id)
                         editUser('edit', user);
+                } else if ($state.is('main.profile')) {
+                    var user = angular.copy(vm.userInfo);
+                    if (user && user.id)
+                        editUser('update', user);
                 } else if ($state.is('main.comments')) {
                     var lesson = CommonInfo.getInfo('lesson');
                     if (lesson && lesson.id)
