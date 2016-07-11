@@ -82,7 +82,8 @@
 
         function forgetPassword() {
             if ($location.absUrl()) {
-                var url = $location.absUrl().substring(0, $location.absUrl().indexOf('#') + 2);
+                var url = $location.absUrl();
+                url = url.substring(0, url.indexOf('#') + 2) + 'reset/';
                 vm.forget.host = url;
                 $http.post(CommonInfo.getAppUrl() + "/api/forget", vm.forget).then(
                     function(response) {

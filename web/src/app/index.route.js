@@ -14,6 +14,12 @@
                 controller: 'LoginController',
                 controllerAs: 'vm'
             })
+            .state('reset', {
+                url: '/reset/:token',
+                templateUrl: 'app/login/resetPassword.html',
+                controller: 'ResetPasswordController',
+                controllerAs: 'vm'
+            })
             .state('main', {
                 url: '/main',
                 abstract: true,
