@@ -185,7 +185,7 @@ var self = {
                 delete rows.password;
                 callback({ "Error": false, "Message": "Success", "token": token, "result": rows });
             } else {
-                callback({ "Error": true, "Message": "You donot have account with us try to signin" });
+                callback({ "Error": true, "Message": "Email/Phone or Password is in correct" });
             }
         });
     },
