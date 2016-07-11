@@ -258,17 +258,19 @@ var self = {
         });
         if (!user) {
             callback({ "Error": true, "Message": "Password reset token is invalid or has expired" });
+        } else {
+            var query = "UPDATE ?? SET password=? WHERE id=?";
+            var queryValues = ["user", md5(request.password), user.id];
+            query = mysql.format(query, queryValues);
+            console.log(query);
+            connection.query(query, function(err, rows) {
+                if (err) {
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Success" });
+                }
+            });
         }
-        var query = "UPDATE table ?? SET password=? WHERE id=?";
-        var queryValues = ["user", md5(request.password), user.id];
-        query = mysql.format(query, queryValues);
-        connection.query(query, function(err, rows) {
-            if (err) {
-                callback({ "Error": true, "Message": err });
-            } else {
-                callback({ "Error": false, "Message": "Success" });
-            }
-        });
     },
     getProfile: function(request, connection, callback) { /// get user info by id
         var query = "SELECT * FROM user where id=?";
