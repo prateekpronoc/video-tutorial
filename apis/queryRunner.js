@@ -262,7 +262,6 @@ var self = {
             var query = "UPDATE ?? SET password=? WHERE id=?";
             var queryValues = ["user", md5(request.password), user.id];
             query = mysql.format(query, queryValues);
-            console.log(query);
             connection.query(query, function(err, rows) {
                 if (err) {
                     callback({ "Error": true, "Message": err });
