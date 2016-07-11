@@ -29,7 +29,13 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
     });
 
     router.post("/forget", function(req, res){
-        queryHelper.forgetPassword(req, req.body, connection, function(result) {
+        queryHelper.forgetPassword(req.body, connection, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/reset", function(req, res){
+        queryHelper.resetPassword(req.body, connection, md5, function(result) {
             res.json(result);
         });
     });

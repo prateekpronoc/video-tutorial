@@ -8,33 +8,32 @@
     /** @ngInject */
     function ResetPasswordController($http, CommonInfo, $state, growl, $stateParams) {
         var vm = this;
+        var token = "";
 
         vm.user = {
             confirmPassword: '',
             password: ''
         };
-        vm.token = "";
 
         vm.resetPassword = resetPassword;
 
         activate();
 
         function activate() {
-        	vm.token = $stateParams.token;
-        	console.log(vm.token);
+            token = $stateParams.token;
         }
 
         function resetPassword() {
-            if (vm.user.email && vm.user.password) {
-                $http.post(CommonInfo.getAppUrl() + "/api/reset", vm.user).then(
+            if (vm.user.password && token) {
+                var data = {
+                    password: vm.user.password,
+                    token: token
+                }
+                $http.post(CommonInfo.getAppUrl() + "/api/reset", data).then(
                     function(response) {
-                        if (response && response.data && response.data.result && !response.data.Error) {
-                            CommonInfo.setInfo('user', response.data.result);
-                            var profileType = response.data.result.profileType;
-                            if (profileType == 'student')
-                                $state.go('main.libary');
-                            else if (profileType == 'admin')
-                                $state.go('main.courses');
+                        if (response && response.data && !response.data.Error) {
+                            growl.info('Password change successfuly');
+                            $state.go('login');
                         } else if (response && response.data && response.data.Error) {
                             growl.info(response.data.Message);
                         }

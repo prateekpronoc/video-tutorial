@@ -3,7 +3,8 @@ var _ = require("lodash");
 var nodemailer = require('nodemailer');
 var async = require('async');
 var crypto = require('crypto');
-var usersList = coursesList = lessonsList = unitsList = [];
+var moment = require('moment');
+var usersList = coursesList = lessonsList = unitsList = forgetList = [];
 
 var self = {
     initdictionaries: function(connection) {
@@ -192,7 +193,7 @@ var self = {
             }
         });
     },
-    forgetPassword: function(req, request, connection, callback) {
+    forgetPassword: function(request, connection, callback) {
         async.waterfall([
             function(done) {
                 crypto.randomBytes(20, function(err, buf) {
@@ -208,11 +209,11 @@ var self = {
                     if (rows && rows.length > 0) {
                         var user = rows[0];
 
-                        user.resetPasswordToken = token;
-                        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
+                        user.token = token;
+                        user.expires = moment().add(1, 'h'); // 1 hour
+                        forgetList.push(user);
                         //user.save(function(err) {
-                            done(err, token, user);
+                        done(err, token);
                         //});
                     } else if (rows && rows.length == 0) {
                         callback({ "Error": true, "Message": "No account with that email address exists" });
@@ -221,7 +222,7 @@ var self = {
                     }
                 });
             },
-            function(token, user, done) {
+            function(token, done) {
                 var transporter = nodemailer.createTransport({
                     service: 'Gmail',
                     auth: {
@@ -249,6 +250,24 @@ var self = {
         ], function(err) {
             if (err)
                 callback({ "Error": true, "Message": err });
+        });
+    },
+    resetPassword: function(request, connection, md5, callback) {
+        var user = _.find(forgetList, function(value) {
+            return value.token == request.token && moment().isBefore(value.expires)
+        });
+        if (!user) {
+            callback({ "Error": true, "Message": "Password reset token is invalid or has expired" });
+        }
+        var query = "UPDATE table ?? SET password=? WHERE id=?";
+        var queryValues = ["user", md5(request.password), user.id];
+        query = mysql.format(query, queryValues);
+        connection.query(query, function(err, rows) {
+            if (err) {
+                callback({ "Error": true, "Message": err });
+            } else {
+                callback({ "Error": false, "Message": "Success" });
+            }
         });
     },
     getProfile: function(request, connection, callback) { /// get user info by id
@@ -286,18 +305,10 @@ var self = {
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
             if (err) {
-                return connection.rollback(function() {
-                    callback({ "Error": true, "Message": err });
-                });
-            }
-            connection.commit(function(err) {
-                if (err) {
-                    return connection.rollback(function() {
-                        callback({ "Error": true, "Message": err });
-                    });
-                }
+                callback({ "Error": true, "Message": err });
+            } else {
                 callback({ "Error": false, "Message": "User Updated", 'user': request });
-            });
+            }
         });
     },
     savePaymentDetails: function(req, paymentInfo, connection, callback) {
