@@ -7,8 +7,6 @@ var moment = require('moment');
 var config = require('./config');
 var msg91 = require("msg91")(config.msgSms.authKey, config.msgSms.sender, "4");
 var speakeasy = require('speakeasy');
-var lib = require('otplib');
-var totp = lib.totp;
 
 
 var usersList = coursesList = lessonsList = unitsList = forgetList = [];
