@@ -40,6 +40,18 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
         });
     });
 
+    router.post("/sendOtp", function(req, res){
+        queryHelper.generatOtp(req.body, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/validateOtp", function(req, res){
+        queryHelper.validatetOtp(req.body, function(result) {
+            res.json(result);
+        });
+    });
+
     //    router.use(function(req, res, next) {
     //        // check header or url parameters or post parameters for token
     //        var token = req.body.token || req.query.token || req.headers['x-access-token'];

@@ -4,6 +4,13 @@ var nodemailer = require('nodemailer');
 var async = require('async');
 var crypto = require('crypto');
 var moment = require('moment');
+var config = require('./config');
+var msg91 = require("msg91")(config.msgSms.authKey, config.msgSms.sender, "4");
+var speakeasy = require('speakeasy');
+var lib = require('otplib');
+var totp = lib.totp;
+
+
 var usersList = coursesList = lessonsList = unitsList = forgetList = [];
 
 var self = {
@@ -133,14 +140,17 @@ var self = {
     findUser: function(request, connection, callback) {
         request.email = request.email || null;
         request.phone = request.phone || null;
-        var query = "SELECT id FROM ?? WHERE ??=? or ??=?";
+        var query = "SELECT id, email, phone FROM ?? WHERE ??=? or ??=?";
         var queryValues = ["user", "email", request.email, "phone", request.phone];
         query = mysql.format(query, queryValues);
         connection.query(query, function(err, rows) {
             if (err) {
                 callback({ "Error": true, "Message": err });
             } else if (rows && rows.length > 0) {
-                callback({ "Error": false, "Message": "User Present", "Code": 1 });
+                console.log(rows)
+                var isEmail = _.find(rows, { 'email': request.email }) ? true : false;
+                var isPhone = _.find(rows, { 'phone': request.phone }) ? true : false;
+                callback({ "Error": false, "Message": "Email/Phone already in use", "Code": 1, "isEmail": isEmail, "isPhone": isPhone });
             } else {
                 callback({ "Error": false, "Message": "User Not Present", "Code": 0 });
             }
@@ -153,7 +163,6 @@ var self = {
             phone: request.phone
         };
         self.findUser(data, connection, function(result) {
-            console.log(result);
             if (result && !result.Error && !result.Code) {
                 query = "INSERT INTO ??(??,??, ??, ??, ??) VALUES (?,?, ?, ?, ?)";
                 queryValues = ["user", "email", "phone", "password", "fullName", "profileType", request.email, request.phone, md5(request.password), request.fullName, request.profileType];
@@ -167,17 +176,19 @@ var self = {
                     }
                 });
             } else if (result && !result.Error && result.Code) {
-                callback({ "Error": true, "Message": "Email/Phone already in use" });
+                result.Error = true
+                callback(result);
             } else {
                 callback({ "Error": true, "Message": "Error occured, Please try after some time" });
             }
         });
     },
     login: function(request, connection, jwt, md5, callback) { /// for login to app
-        var loginIdField = /^\d{10}$/.test(request.email) ? 'phone' : 'email';
+        var loginIdField = /^\d{10}$/.test(request.userName) ? 'phone' : 'email';
         var query = "SELECT * FROM ?? WHERE ??=? && ??=?";
-        var queryValues = ["user", loginIdField, request.email, "password", md5(request.password)];
+        var queryValues = ["user", loginIdField, request.userName, "password", md5(request.password)];
         query = mysql.format(query, queryValues);
+        console.log(query)
         connection.query(query, function(err, rows) {
             if (err) {
                 callback({ "Error": true, "Message": "Error executing MySQL query" });
@@ -312,6 +323,43 @@ var self = {
             }
         });
     },
+    generatOtp: function(request, callback) {
+        // var secret = totp.utils.generateSecret();
+        // var code = totp.generate(secret);
+        var secret = speakeasy.generateSecret();
+        secret = secret.base32;
+        var code = speakeasy.totp({
+            secret: secret,
+            encoding: 'base32',
+            step: 120
+        });
+        //callback({ "Error": false, "secret": secret, "code": code });
+        msg91.send(request.phone, "Your OTP:" + code, function(err, response) {
+            if (err) {
+                callback({ "Error": true, "Message": "Unable to send message to phone number" });
+            } else {
+                callback({ "Error": false, "secret": secret, "code": code });
+            }
+            msg91.getBalance(function(err, msgCount) {
+                console.log(err);
+                console.log(msgCount);
+            });
+        });
+
+    },
+    validatetOtp: function(request, callback) {
+        //var status = totp.check(request.code, request.secret);
+        var status = speakeasy.totp.verify({
+            secret: request.secret,
+            encoding: 'base32',
+            token: request.code,
+            step: 120
+        });
+        if (status)
+            callback({ "Error": false, "Message": "Correct code" });
+        else
+            callback({ "Error": true, "Message": "Incorrect code" });
+    },
     savePaymentDetails: function(req, paymentInfo, connection, callback) {
         var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         var queryValues = ["payment_details", "payment_request_id", "phone", "purpose", "amount", "email", "fullName", "userId", "courseId", paymentInfo.id, req.phone, req.purpose, req.amt, req.email, req.fullName, req.userId, req.courseId];
@@ -436,8 +484,8 @@ var self = {
     },
     addUpdateCourse: function(request, connection, callback) { /// update or add course
         var query, queryValues;
-        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName)";
-        queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, request.isDeleted];
+        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo)";
+        queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo];
         query = mysql.format(query, queryValues);
         if (request.instructors && request.instructors.length > 0) {
             self.addCourseWithUsers(query, request, connection, function(err, rows, courseId) {
@@ -599,7 +647,7 @@ var self = {
     addUpdateLesson: function(request, connection, callback) { /// add update lesson
         var query, queryValues;
         query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description), video=VALUES(video), duration=VALUES(duration), isDeleted=VALUES(isDeleted), poster=VALUES(poster)";
-        queryValues = ["lessons", "id", "name", "description", "video", "duration", "isDeleted", "poster", request.id, request.name, request.description, request.video, request.duration, request.isDeleted, request.poster];
+        queryValues = ["lessons", "id", "name", "description", "video", "duration", "isDeleted", "poster", request.id, request.name, request.description, request.video, request.duration, (request.isDeleted == 'true'), request.poster];
         query = mysql.format(query, queryValues);
         connection.beginTransaction(function(err) {
             if (err) {
