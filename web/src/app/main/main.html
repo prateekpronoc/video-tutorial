@@ -3,7 +3,7 @@
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container-fluid">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" ng-click="vm.isCollapsed = !vm.isCollapsed" aria-expanded="true">
+                <button type="button" class="navbar-toggle" ng-click="vm.isCollapsed = !vm.isCollapsed" aria-expanded="false">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
@@ -13,7 +13,7 @@
                     <img src="assets/images/forumias-small.png" style="margin-top:-11px;" />
                 </a>
             </div>
-            <div class="navbar-collapse collapse in" uib-collapse="vm.isCollapsed" aria-expanded="true" style="margin-right:25px;">
+            <div class="navbar-collapse collapse in" uib-collapse="vm.isCollapsed" aria-expanded="false" style="margin-right:25px;">
                 <!-- <div class="collapse navbar-collapse" uib-dropdown-menu role="menu" aria-labelledby="single-button"> -->
                 <span class="nav navbar-nav navbar-right" uib-dropdown>
                     <img ng-src="{{vm.userInfo.profilePhoto || 'assets/images/defaultProfileImg.png'}}" style="width:50px;border:1px solid gainsboro;" class="img-responsive center-block img-circle" id="simple-dropdown" uib-dropdown-toggle>

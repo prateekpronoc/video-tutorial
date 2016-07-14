@@ -3,25 +3,7 @@
 
     angular
         .module('web')
-        .controller('MainController', MainController)
-        .directive('youtube', youtube);
-
-    /** @ngInject */
-    function youtube($sce) {
-        return {
-            restrict: 'EA',
-            scope: { code: '=' },
-            replace: true,
-            template: '<div style="height:400px;"><iframe style="overflow:hidden;height:100%;width:100%" width="100%" height="100%" src="{{url}}" frameborder="0" allowfullscreen></iframe></div>',
-            link: function(scope) {
-                scope.$watch('code', function(newVal) {
-                    if (newVal) {
-                        scope.url = $sce.trustAsResourceUrl("http://www.youtube.com/embed/" + newVal);
-                    }
-                });
-            }
-        };
-    }
+        .controller('MainController', MainController);
 
     /** @ngInject */
     function MainController($http, CommonInfo, Upload, $state, credentials, $uibModal, _, growl, $scope) {
@@ -45,6 +27,12 @@
             instructors: []
         };
         vm.objMode; // hold the current mode for entity(edit/insert)
+        vm.dateOptions = {
+            formatYear: 'yy',
+            startingDay: 1
+        };
+        vm.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
+        vm.format = 'dd-MMMM-yyyy';
 
         vm.getAllCourses = getAllCourses;
         vm.subscribeCourse = subscribeCourse;
@@ -83,6 +71,7 @@
         activate();
 
         function activate() {
+            console.log(moment())
             vm.config = credentials.getCredentials();
             vm.userInfo = CommonInfo.getInfo('user');
             if (vm.userInfo && vm.userInfo.profileType == 'student') {
@@ -293,6 +282,7 @@
             if (mode == 'edit') {
                 $state.go('main.editCourse');
                 vm.course = course;
+                vm.course.validTo = vm.course.validTo ? new Date(vm.course.validTo) : "";
             } else if (mode == 'insert') {
                 vm.course = {
                     units: [],

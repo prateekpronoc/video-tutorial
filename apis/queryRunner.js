@@ -145,7 +145,6 @@ var self = {
             if (err) {
                 callback({ "Error": true, "Message": err });
             } else if (rows && rows.length > 0) {
-                console.log(rows)
                 var isEmail = _.find(rows, { 'email': request.email }) ? true : false;
                 var isPhone = _.find(rows, { 'phone': request.phone }) ? true : false;
                 callback({ "Error": false, "Message": "Email/Phone already in use", "Code": 1, "isEmail": isEmail, "isPhone": isPhone });
@@ -165,7 +164,6 @@ var self = {
                 query = "INSERT INTO ??(??,??, ??, ??, ??) VALUES (?,?, ?, ?, ?)";
                 queryValues = ["user", "email", "phone", "password", "fullName", "profileType", request.email, request.phone, md5(request.password), request.fullName, request.profileType];
                 query = mysql.format(query, queryValues);
-                query = mysql.format(query, queryValues);
                 connection.query(query, function(err, rows) {
                     if (err) {
                         callback({ "Error": true, "Message": err });
@@ -182,11 +180,10 @@ var self = {
         });
     },
     login: function(request, connection, jwt, md5, callback) { /// for login to app
-        var loginIdField = /^\d{10}$/.test(request.userName) ? 'phone' : 'email';
+        var loginIdField = /^\d+$/.test(request.userName) ? 'phone' : 'email';
         var query = "SELECT * FROM ?? WHERE ??=? && ??=?";
         var queryValues = ["user", loginIdField, request.userName, "password", md5(request.password)];
         query = mysql.format(query, queryValues);
-        console.log(query)
         connection.query(query, function(err, rows) {
             if (err) {
                 callback({ "Error": true, "Message": "Error executing MySQL query" });
@@ -485,6 +482,7 @@ var self = {
         query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo)";
         queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo];
         query = mysql.format(query, queryValues);
+        console.log(query);
         if (request.instructors && request.instructors.length > 0) {
             self.addCourseWithUsers(query, request, connection, function(err, rows, courseId) {
                 if (err) {
