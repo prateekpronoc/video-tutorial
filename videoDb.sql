@@ -67,8 +67,6 @@ CREATE TABLE `courses` (
   `name` varchar(100) NOT NULL,
   `description` varchar(255) NOT NULL,
   `demoVideo` varchar(255) DEFAULT NULL,
-  `validFrom` bigint(20) unsigned DEFAULT NULL,
-  `validTo` bigint(20) unsigned DEFAULT NULL,
   `duration` int(10) unsigned DEFAULT NULL,
   `color_code` varchar(45) DEFAULT NULL,
   `subscriptionFee` varchar(45) DEFAULT NULL,
@@ -77,8 +75,9 @@ CREATE TABLE `courses` (
   `fileName` varchar(100) DEFAULT NULL,
   `isDeleted` tinyint(1) DEFAULT '0',
   `demoPoster` varchar(255) DEFAULT NULL,
+  `validTo` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 
 --
 -- Definition of table `courses_instructor`
@@ -108,6 +107,7 @@ CREATE TABLE `lesson_comments` (
   `isDeleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+
 
 --
 -- Definition of table `lesson_files`
@@ -192,7 +192,7 @@ CREATE TABLE `units` (
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
-  `id` int(70) unsigned NOT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
   `fullName` varchar(255) DEFAULT NULL,
   `joinDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `about` varchar(200) DEFAULT NULL,
@@ -204,7 +204,7 @@ CREATE TABLE `user` (
   `profileType` varchar(45) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `user`
@@ -212,7 +212,7 @@ CREATE TABLE `user` (
 
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 INSERT INTO `user` (`id`,`fullName`,`joinDate`,`about`,`profilePhoto`,`billingAddress`,`email`,`phone`,`status`,`profileType`,`password`) VALUES 
- (9,'Admin','2016-06-28 19:51:13','fine','null','','admin@gmail.com','1234567890','null','admin','81dc9bdb52d04dc20036dbd8313ed055');
+ (9,'Admin','2016-06-28 19:51:13','fine','http://localhost:3000\\imagesPath\\m4Cf1sb1rrX4DQf94tXuZ_jL.png','','admin@gmail.com','1234567890','null','admin','81dc9bdb52d04dc20036dbd8313ed055');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
 
