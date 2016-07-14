@@ -3,6 +3,7 @@ var config = require('./config');
 var path = require('path');
 var request = require('request');
 var qpdf = require('node-qpdf');
+var fs = require('fs');
 
 function REST_ROUTER(router, connection, md5, jwt, imgUpload, fileUpload) {
     var self = this;
@@ -28,25 +29,25 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
         });
     });
 
-    router.post("/forget", function(req, res){
+    router.post("/forget", function(req, res) {
         queryHelper.forgetPassword(req.body, connection, function(result) {
             res.json(result);
         });
     });
 
-    router.post("/reset", function(req, res){
+    router.post("/reset", function(req, res) {
         queryHelper.resetPassword(req.body, connection, md5, function(result) {
             res.json(result);
         });
     });
 
-    router.post("/sendOtp", function(req, res){
+    router.post("/sendOtp", function(req, res) {
         queryHelper.generatOtp(req.body, function(result) {
             res.json(result);
         });
     });
 
-    router.post("/validateOtp", function(req, res){
+    router.post("/validateOtp", function(req, res) {
         queryHelper.validatetOtp(req.body, function(result) {
             res.json(result);
         });
@@ -99,10 +100,13 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
     /* courses releated routes started */
     router.post("/course", fileUpload, function(req, res) { /// add or update courses with or without instructor
         if (req && req.files && req.files.file && req.files.file.path) {
-            req.body.course.filePath = req.protocol + '://' + req.get('host') + req.files.file.path.substring(req.files.file.path.indexOf('\\'));
+            req.body.course.filePath = req.files.file.path; //req.protocol + '://' + req.get('host') + req.files.file.path.substring(req.files.file.path.indexOf('\\'));
             req.body.course.fileName = req.files.file.name;
         }
         queryHelper.addUpdateCourse(req.body.course, connection, function(result) {
+            if (result && result.courseId) {
+                setFileToCorrectLocation(result.courseId, req.protocol, req.get('host'));
+            }
             if (result && result.courseId && req.body.course.units) {
                 queryHelper.addUpdateCourseUnit(req.body.course.units, result.courseId, connection, function(result) {
                     res.json(result);
@@ -265,16 +269,18 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
     router.post("/util/downloadFile", function(req, res) {
         queryHelper.getProfile(req.body, connection, function(result) {
             if (result && result.user.email) {
-                var options = {
-                    keyLength: 40,
-                    password: result.user.email,
-                    restrictions: {
-                        modify: 'n',
-                        extract: 'n'
-                    }
-                };
-                var doc = qpdf.encrypt('http://localhost:3000/filesPath/fA-TGxr-cCGIfMw8gHUcgTvF.pdf', options);
-                doc.pipe(res);
+
+                // var options = {
+                //     keyLength: 40,
+                //     password: result.user.email,
+                //     restrictions: {
+                //         modify: 'n',
+                //         extract: 'n'
+                //     }
+                // };
+                // var doc = qpdf.encrypt('http://localhost:3000/filesPath/fA-TGxr-cCGIfMw8gHUcgTvF.pdf', options);
+                // doc.pipe(res);
+                res.download('http://localhost:3000/filesPath/sGo-xBpvMsUFSNLwPSv9zbke.pdf');
                 res.writeHead(200, {
                     'Content-Type': 'application/pdf',
                     'Access-Control-Allow-Origin': '*',
@@ -283,6 +289,36 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
             }
         })
     });
+
+    function setFileToCorrectLocation(id, protocol, host) {
+        queryHelper.getCourseFile(id, connection, function(result) {
+            if (result && result.files && result.files.length > 0) {
+                for (var i = 0; i < result.files.length; i++) {
+                    var targetDir = './public/filesPath/' + id + '/';
+                    if (!fs.existsSync(targetDir)) {
+                        fs.mkdirSync(targetDir);
+                    }
+                    var tmp_path = result.files[i].filePath;
+                    console.log(tmp_path)
+                    var target_path = targetDir + result.files[i].fileName;
+                    fs.rename(tmp_path, target_path, saveTODB(result.files[i], protocol, host, target_path));
+                }
+            }
+        });
+
+    }
+
+    var saveTODB = function(file, protocol, host, path) {
+        return function(error) {
+            if (!error) {
+                file.filePath = protocol + '://' + host + '/' + path.substring(path.indexOf('filesPath'));
+                console.log(file.filePath);
+                queryHelper.updateFilePath(file, connection, function(result) {});
+            } else {
+                console.log('while writting')
+            }
+        }
+    }
 
 }
 

@@ -281,6 +281,7 @@ var self = {
         var query = "SELECT * FROM user where id=?";
         var queryValues = [request.userId];
         query = mysql.format(query, queryValues);
+        console.log(query)
         connection.query(query, function(err, rows) {
             if (err) {
                 callback({ "Error": true, "Message": "Error executing MySQL query" });
@@ -482,7 +483,7 @@ var self = {
         query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo)";
         queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo];
         query = mysql.format(query, queryValues);
-        console.log(query);
+        console.log(query)
         if (request.instructors && request.instructors.length > 0) {
             self.addCourseWithUsers(query, request, connection, function(err, rows, courseId) {
                 if (err) {
@@ -493,11 +494,12 @@ var self = {
                 }
             });
         } else {
-            connection.query(query, function(err, rows, courseId) {
+            connection.query(query, function(err, rows) {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
                     self.getCoursesList(connection);
+                    var courseId = rows.insertId || request.id;
                     callback({ "Error": false, "Message": "Course Added", "courseId": courseId });
                 }
             });
@@ -612,6 +614,26 @@ var self = {
                 }
             });
         }
+    },
+    getCourseFile: function(id, connection, callback) {
+        var query = "SELECT id, fileName, filePath FROM ?? WHERE id = ?";
+        var queryValues = ["courses", id];
+        query = mysql.format(query, queryValues);
+        connection.query(query, function(err, rows) {
+            if (err) {
+                callback({ "files": [] });
+            } else {
+                callback({ "files": rows });
+            }
+        });
+    },
+    updateFilePath: function(file, connection, callback){
+        var query = "UPDATE ?? SET filePath = ? WHERE id = ?";
+        var queryValues = ["courses", file.filePath, file.id];
+        query= mysql.format(query, queryValues);
+        connection.query(query, function(err, rows){
+            callback({"result": rows});
+        });
     },
     getAllUnits: function(type, id, connection, callback) { /// get list of units(by course id)
         var query, queryValues;
