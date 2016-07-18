@@ -2,41 +2,48 @@ var queryHelper = require('./queryRunner');
 var config = require('./config');
 var path = require('path');
 var request = require('request');
-var qpdf = require('node-qpdf');
+var watermark = require('image-watermark');
 var fs = require('fs');
 
-function REST_ROUTER(router, connection, md5, jwt, imgUpload, fileUpload) {
+
+// function REST_ROUTER(router, connection, md5, jwt, imgUpload, fileUpload) {
+//     var self = this;
+//     self.handleRoutes(router, connection, md5, jwt, imgUpload, fileUpload);
+// }
+
+function REST_ROUTER(router, pool, md5, jwt, imgUpload, fileUpload) {
     var self = this;
-    self.handleRoutes(router, connection, md5, jwt, imgUpload, fileUpload);
+    self.handleRoutes(router, pool, md5, jwt, imgUpload, fileUpload);
 }
 
-REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgUpload, fileUpload) {
-    queryHelper.initdictionaries(connection);
+// REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgUpload, fileUpload) {
+REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload, fileUpload) {
+    queryHelper.initdictionaries(pool);
     router.get("/", function(req, res) { /// base route not for use
         res.json({ "Message": "Hello World!" });
     });
 
     router.post("/user", function(req, res) { /// user signup route
-        queryHelper.signup(req.body, connection, md5, function(result) {
+        queryHelper.signup(req.body, pool, md5, function(result) {
             res.json(result);
         });
     });
 
     router.post("/login", function(req, res) { /// user signin route
         req.body.secretString = config.secret;
-        queryHelper.login(req.body, connection, jwt, md5, function(result) {
+        queryHelper.login(req.body, pool, jwt, md5, function(result) {
             res.json(result);
         });
     });
 
     router.post("/forget", function(req, res) {
-        queryHelper.forgetPassword(req.body, connection, function(result) {
+        queryHelper.forgetPassword(req.body, pool, function(result) {
             res.json(result);
         });
     });
 
     router.post("/reset", function(req, res) {
-        queryHelper.resetPassword(req.body, connection, md5, function(result) {
+        queryHelper.resetPassword(req.body, pool, md5, function(result) {
             res.json(result);
         });
     });
@@ -79,13 +86,13 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
     //    });
 
     router.post("/user/byId", function(req, res) { /// get user by id
-        queryHelper.getProfile(req.body, connection, function(result) {
+        queryHelper.getProfile(req.body, pool, function(result) {
             res.json(result);
         });
     });
 
     router.post("/user/byType", function(req, res) { /// get user by type
-        queryHelper.getAllUsers("byType", req.body.type, connection, function(result) {
+        queryHelper.getAllUsers("byType", req.body.type, pool, function(result) {
             res.json(result);
         });
     });
@@ -93,22 +100,23 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
     router.put("/user", imgUpload, function(req, res) { /// user update router
         if (req && req.files && req.files.file && req.files.file.path)
             req.body.user.profilePhoto = req.protocol + '://' + req.get('host') + '/' + req.files.file.path.substring(req.files.file.path.indexOf('\/'));
-        queryHelper.updateUser(req.body.user, connection, function(result) {
+        queryHelper.updateUser(req.body.user, pool, function(result) {
             res.json(result);
         });
     });
     /* courses releated routes started */
     router.post("/course", fileUpload, function(req, res) { /// add or update courses with or without instructor
         if (req && req.files && req.files.file && req.files.file.path) {
-            req.body.course.filePath = req.files.file.path; //req.protocol + '://' + req.get('host') + req.files.file.path.substring(req.files.file.path.indexOf('\\'));
+            //watermark.embedWatermark(path.resolve("./public/filesPath/UsRQqz1Ak53cnbsGm2AxPNkG.pdf"), {'text' : 'sample watermark'});
+            req.body.course.filePath = req.protocol + '://' + req.get('host') + req.files.file.path.substring(req.files.file.path.indexOf('\\'));
             req.body.course.fileName = req.files.file.name;
         }
-        queryHelper.addUpdateCourse(req.body.course, connection, function(result) {
-            if (result && result.courseId) {
-                setFileToCorrectLocation(result.courseId, req.protocol, req.get('host'));
-            }
+        queryHelper.addUpdateCourse(req.body.course, pool, function(result) {
+            // if (result && result.courseId) {
+            //     setFileToCorrectLocation(result.courseId, req.protocol, req.get('host'));
+            // }
             if (result && result.courseId && req.body.course.units) {
-                queryHelper.addUpdateCourseUnit(req.body.course.units, result.courseId, connection, function(result) {
+                queryHelper.addUpdateCourseUnit(req.body.course.units, result.courseId, pool, function(result) {
                     res.json(result);
                 });
             } else {
@@ -126,7 +134,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
             buyer_name: req.body.fullName,
             redirect_url: 'http://52.66.78.88/#/main/libary',
             send_email: false,
-            webhook: 'http://52.66.77.5/api/course/payment',
+            webhook: 'http://52.66.82.252/api/course/payment',
             send_sms: false,
             email: req.body.email,
             allow_repeated_payments: false
@@ -134,7 +142,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
         request.post('https://www.instamojo.com/api/1.1/payment-requests/', { form: payload, headers: headers }, function(error, response, body) {
             if (!error && response.statusCode == 201) {
                 var requestLink = JSON.parse(body);
-                queryHelper.savePaymentDetails(req.body, requestLink.payment_request, connection, function(result) {
+                queryHelper.savePaymentDetails(req.body, requestLink.payment_request, pool, function(result) {
                     if (result && !result.Error)
                         res.json({ 'url': requestLink.payment_request.longurl });
                     else
@@ -147,49 +155,49 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
     });
 
     router.post("/course/payment", function(req, res) {
-        queryHelper.savePaymentStatus(req.body, connection, function(result) {
+        queryHelper.savePaymentStatus(req.body, pool, function(result) {
             res.send('done');
         });
     });
 
     router.post("/course/byId", function(req, res) {
-        queryHelper.getCourseById(req.body, connection, function(result) {
+        queryHelper.getCourseById(req.body, pool, function(result) {
             res.json(result);
         });
     });
 
     router.post("/course/search", function(req, res) {
-        queryHelper.searchCourse('byName', req.body, connection, function(result) {
+        queryHelper.searchCourse('byName', req.body, pool, function(result) {
             res.json(result);
         });
     });
 
     router.get("/course/courseAndUnits", function(req, res) {
-        queryHelper.getCourseAndUnits(connection, function(result) {
+        queryHelper.getCourseAndUnits(pool, function(result) {
             res.json(result);
         });
     });
 
     router.get("/course/all", function(req, res) { /// get all courses
-        queryHelper.getAllCourses("all", 0, connection, function(result) {
+        queryHelper.getAllCourses("all", 0, pool, function(result) {
             res.json(result);
         });
     });
 
     router.get("/course/allSeasional", function(req, res) { /// get seasional courses
-        queryHelper.getAllCourses("allSeasional", 0, connection, function(result) {
+        queryHelper.getAllCourses("allSeasional", 0, pool, function(result) {
             res.json(result);
         });
     });
 
     router.post("/course/subscribed", function(req, res) { /// get subscribed courses by user id
-        queryHelper.getAllCourses("subscribed", req.body.userId, connection, function(result) {
+        queryHelper.getAllCourses("subscribed", req.body.userId, pool, function(result) {
             res.json(result);
         });
     });
 
     router.post("/course/unsubscribed", function(req, res) { /// get unsubscribed courses by user id
-        queryHelper.getAllCourses("unsubscribed", req.body.userId, connection, function(result) {
+        queryHelper.getAllCourses("unsubscribed", req.body.userId, pool, function(result) {
             res.json(result);
         });
     });
@@ -197,7 +205,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
 
     /* Units related routes start */
     router.post("/unit/byCourse", function(req, res) { /// get all units by course
-        queryHelper.getAllUnits("byCourseId", req.body.courseId, connection, function(result) {
+        queryHelper.getAllUnits("byCourseId", req.body.courseId, pool, function(result) {
             res.json(result);
         });
     });
@@ -205,7 +213,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
 
     /* Lessons related roues starts*/
     router.post("/lesson", fileUpload, function(req, res) { /// create or update lesson
-        queryHelper.addUpdateLesson(req.body.lesson, connection, function(result) {
+        queryHelper.addUpdateLesson(req.body.lesson, pool, function(result) {
             if (req && req.files && req.files.file && req.body.lesson && result.lessonId) {
                 var lessonFiles = {
                     filesList: [],
@@ -218,7 +226,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
                     };
                     lessonFiles.filesList.push(file);
                 }
-                queryHelper.addFilesToLesson(lessonFiles, connection, function(result) {
+                queryHelper.addFilesToLesson(lessonFiles, pool, function(result) {
                     res.json(result);
                 });
             } else {
@@ -228,19 +236,19 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
     });
 
     router.post('/lesson/byId', function(req, res) {
-        queryHelper.getLessonById(req.body, connection, function(result) {
+        queryHelper.getLessonById(req.body, pool, function(result) {
             res.json(result);
         });
     });
 
     router.post("/lesson/addComment", function(req, res) { /// add comment to lesson
-        queryHelper.addCommentOnLesson(req.body, connection, function(result) {
+        queryHelper.addCommentOnLesson(req.body, pool, function(result) {
             res.json(result);
         });
     });
 
     router.post("/lesson/allComment", function(req, res) { /// add comment to lesson
-        queryHelper.getCommentOnLesson(req.body, connection, function(result) {
+        queryHelper.getCommentOnLesson(req.body, pool, function(result) {
             res.json(result);
         });
     });
@@ -254,20 +262,20 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
 
     /* Category related routes starts*/
     router.get("/category/all", function(req, res) { /// get all lessons by unit
-        queryHelper.getAllCategories("all", 0, connection, function(result) {
+        queryHelper.getAllCategories("all", 0, pool, function(result) {
             res.json(result);
         });
     });
 
     router.post("/category", function(req, res) { /// get all lessons by unit
-        queryHelper.addCategories(req.body, connection, function(result) {
+        queryHelper.addCategories(req.body, pool, function(result) {
             res.json(result);
         });
     });
     /* Category related routes ends*/
 
     router.post("/util/downloadFile", function(req, res) {
-        queryHelper.getProfile(req.body, connection, function(result) {
+        queryHelper.getProfile(req.body, pool, function(result) {
             if (result && result.user.email) {
 
                 // var options = {
@@ -291,7 +299,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
     });
 
     function setFileToCorrectLocation(id, protocol, host) {
-        queryHelper.getCourseFile(id, connection, function(result) {
+        queryHelper.getCourseFile(id, pool, function(result) {
             if (result && result.files && result.files.length > 0) {
                 for (var i = 0; i < result.files.length; i++) {
                     var targetDir = './public/filesPath/' + id + '/';
@@ -299,7 +307,6 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
                         fs.mkdirSync(targetDir);
                     }
                     var tmp_path = result.files[i].filePath;
-                    console.log(tmp_path)
                     var target_path = targetDir + result.files[i].fileName;
                     fs.rename(tmp_path, target_path, saveTODB(result.files[i], protocol, host, target_path));
                 }
@@ -313,7 +320,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgU
             if (!error) {
                 file.filePath = protocol + '://' + host + '/' + path.substring(path.indexOf('filesPath'));
                 console.log(file.filePath);
-                queryHelper.updateFilePath(file, connection, function(result) {});
+                queryHelper.updateFilePath(file, pool, function(result) {});
             } else {
                 console.log('while writting')
             }

@@ -14,7 +14,7 @@
                     <h2 ng-bind="vm.lesson.name" style="margin:0px 0px 4px"></h2>
                 </div>
                 <div class="embed-responsive embed-responsive-16by9" ng-if="vm.lesson.options">
-                    <jwplayerjs setup="vm.lesson.options"></jwplayerjs>
+                    <jwplayerjs player-id="videoPlayer" setup="vm.lesson.options"></jwplayerjs>
                 </div>
                 <div class="panel-footer">
                     <span>Related files: </span>

@@ -125,7 +125,7 @@
                         <form style="margin-top:15px;" ng-if="vm.isOtp && !vm.isOtpSend && !vm.isOtpValid">
                             <div class="form-group">
                                 <label for="profile.phone">Phone</label>
-                                <input type="text" class="form-control" id="profile.phone" placeholder="Phone" ng-model="vm.newUser.phone" />
+                                <input type="text" class="form-control" id="profile.phone" maxlength="10" placeholder="Phone" ng-model="vm.newUser.phone" />
                             </div>
                             <input class="btn btn-default pull-right" type="button" ng-click="vm.requestOtp()" value="Get OTP">
                             <div class="clearfix"></div>
@@ -141,6 +141,7 @@
                         <form style="margin-top:15px;" ng-if="!vm.isOtp || vm.isOtpValid">
                             <div class="form-group">
                                 <label for="profile.fullName">Full Name</label>
+                                <i class="pull-right">(All fields are mandatory)</i>
                                 <input type="text" class="form-control" id="profile.fullName" placeholder="Full Name" ng-model="vm.newUser.fullName" />
                             </div>
                             <div class="form-group">
@@ -149,12 +150,16 @@
                             </div>
                             <div class="form-group">
                                 <label for="profile.phone">Phone</label>
-                                <input type="text" class="form-control" id="profile.phone" ng-if="!vm.isOtp" placeholder="Phone" ng-model="vm.newUser.phone" />
+                                <input type="text" class="form-control" id="profile.phone" maxlength="10" ng-if="!vm.isOtp" placeholder="Phone" ng-model="vm.newUser.phone" />
                                 <p class="form-control-static" ng-bind="vm.newUser.phone" ng-if="vm.isOtp"></p>
                             </div>
                             <div class="form-group">
                                 <label for="profile.password">Password</label>
                                 <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.newUser.password" />
+                            </div>
+                            <div class="form-group">
+                                <label for="profile.confirmPassword">Confirm Password</label>
+                                <input type="password" class="form-control" id="profile.confirmPassword" placeholder="Confirm Password" ng-model="vm.newUser.confirmPassword" />
                             </div>
                             <input class="btn btn-default pull-right" type="button" ng-click="vm.signup()" value="Sign me Up">
                             <div class="clearfix"></div>

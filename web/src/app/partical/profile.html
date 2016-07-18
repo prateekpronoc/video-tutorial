@@ -14,7 +14,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6" style="border-right:1px solid #e7e7e7;border-left:1px solid #e7e7e7;">
             <form>
                 <div class="form-group">
                     <label for="profile.name">Full Name</label>
@@ -22,13 +22,13 @@
                 </div>
                 <div class="form-group">
                     <label for="profile.email">Email</label>
-                    <p class="form-control-static" ng-bind="vm.user.email"></p>
-                    <!-- <input type="email" class="form-control" id="profile.email" placeholder="Email" ng-model="vm.user.email" /> -->
+                    <p class="form-control-static" ng-bind="vm.user.email" ng-if="vm.objMode == 'update'"></p>
+                    <input type="email" class="form-control" id="profile.email" placeholder="Email" ng-model="vm.user.email" ng-if="vm.objMode != 'update'" />
                 </div>
                 <div class="form-group">
                     <label for="profile.phone">Phone</label>
-                    <p class="form-control-static" ng-bind="vm.user.phone"></p>
-                    <!-- <input type="text" class="form-control" id="profile.phone" placeholder="Phone" ng-model="vm.user.phone" /> -->
+                    <p class="form-control-static" ng-bind="vm.user.phone" ng-if="vm.objMode == 'update'"></p>
+                    <input type="text" class="form-control" id="profile.phone" placeholder="Phone" ng-model="vm.user.phone" ng-if="vm.objMode != 'update'" />
                 </div>
                 <div class="form-group">
                     <label for="profile.about">About you</label>
@@ -40,8 +40,26 @@
                     <textarea class="form-control" id="profile.billingAddress" rows="5" placeholder="Address" ng-model="vm.user.billingAddress">
                     </textarea>
                 </div>
-                <button type="submit" class="btn btn-default" ng-click="vm.updateProfile(vm.user.profilePhoto)">Update</button>
+                <button type="button" class="btn btn-default pull-right" ng-click="vm.updateProfile(vm.user.profilePhoto);">
+                    <span ng-if="vm.objMode != 'insert'">Update</span>
+                    <span ng-if="vm.objMode == 'insert'">Save</span>
+                </button>
             </form>
+        </div>
+        <div class="col-md-3" ng-if="false">
+            <div ng-click="vm.user.changePassword=!vm.user.changePassword">
+                Change User Password
+            </div>
+            <div ng-show="vm.user.changePassword">
+                <div class="form-group">
+                    <label for="profile.password">Password</label>
+                    <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" />
+                </div>
+                <div class="form-group">
+                    <label for="profile.cornfirmPassword">Confirm Password</label>
+                    <input type="password" class="form-control" id="profile.confirmPassword" placeholder="Confirm Password" ng-model="vm.user.confirmPassword" />
+                </div>
+            </div>
         </div>
     </div>
 </div>

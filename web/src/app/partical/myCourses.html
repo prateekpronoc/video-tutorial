@@ -3,7 +3,7 @@
         <div class="col-md-4" ng-repeat="course in vm.courses">
             <div class="panel" ng-style="{'border-color': course.color_code || '#337AB7'}">
                 <div class="panel-heading" ng-bind="course.name" ng-style="{'border-color': course.color_code || '#337AB7', 'background-color': course.color_code || '#337AB7'}"></div>
-                <div class="panel-body" ng-bind="course.description" style="height:150px;"></div>
+                <div class="panel-body body-fixed-height" ng-bind-html="course.description" style="height:150px;"></div>
                 <div class="panel-footer container-fluid">
                 	<div class="row">
                 		<div class="col-md-12 text-right">

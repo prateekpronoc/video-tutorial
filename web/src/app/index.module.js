@@ -15,7 +15,8 @@
             'ngStorage',
             'ngFileUpload',
             'angular-growl',
-            'blockUI'
+            'blockUI',
+            'textAngular'
         ]);
 
 })();

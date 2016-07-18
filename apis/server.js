@@ -20,16 +20,18 @@ function Apis() {
 Apis.prototype.connectMysql = function() {
     var self = this;
     var pool = mysql.createPool(config.database);
-    pool.getConnection(function(err, connection) {
-        if (err) {
-            self.stop(err);
-        } else {
-            self.configureExpress(connection);
-        }
-    });
+    self.configureExpress(pool);
+    // pool.getConnection(function(err, connection) {
+    //     if (err) {
+    //         self.stop(err);
+    //     } else {
+    //         self.configureExpress(connection);
+    //     }
+    // });
 }
 
-Apis.prototype.configureExpress = function(connection) {
+// Apis.prototype.configureExpress = function(connection) {
+Apis.prototype.configureExpress = function(pool) {
     var self = this;
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
@@ -37,7 +39,8 @@ Apis.prototype.configureExpress = function(connection) {
     app.use(express.static('public'));
     var router = express.Router();
     app.use('/api', router);
-    var rest_router = new rest(router, connection, md5, jwt, imgUpload, fileUpload);
+    // var rest_router = new rest(router, connection, md5, jwt, imgUpload, fileUpload);
+    var rest_router = new rest(router, pool, md5, jwt, imgUpload, fileUpload);
     self.startServer();
 }
 

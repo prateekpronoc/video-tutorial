@@ -18,14 +18,18 @@
 
             },
             link: function(scope, element, attrs) {
-                var id = scope.playerId || 'random_player_' + Math.floor((Math.random() * 999999999) + 1),
-                    getTemplate = function(playerId) {
-                        return '<div id="' + playerId + '"></div>';
-                    };
+                scope.$watch('setupVars', function(newValue, oldValue) {
+                    if (scope.setupVars) {
+                        var id = scope.playerId || 'random_player_' + Math.floor((Math.random() * 999999999) + 1),
+                            getTemplate = function(playerId) {
+                                return '<div id="' + playerId + '"></div>';
+                            };
 
-                element.html(getTemplate(id));
-                $compile(element.contents())(scope);
-                jwplayer(id).setup(scope.setupVars);
+                        element.html(getTemplate(id));
+                        $compile(element.contents())(scope);
+                        jwplayer(id).setup(scope.setupVars);
+                    }
+                });
             }
         };
     }
@@ -60,7 +64,7 @@
     function credentials(CommonInfo) {
         return {
             getCredentials: function() {
-                if(CommonInfo.getInfo('user'))
+                if (CommonInfo.getInfo('user'))
                     var userType = CommonInfo.getInfo('user').profileType;
                 var config = {};
                 switch (userType) {

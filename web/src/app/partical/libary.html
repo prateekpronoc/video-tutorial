@@ -9,9 +9,9 @@
                         <span ng-bind="course.duration"></span> hours</span>
                 </div>
                 <div class="panel-body fixedheight">
-                    <span ng-bind="course.description"></span>
+                    <div class="body-fixed-height" ng-bind-html="course.description"></div>
                     <div class="btn-group bottomright">
-                        <button type="button" class="btn btn-default btn-sm" ng-click="vm.showCourseInfo(course.id, course.name)">
+                        <button type="button" class="btn btn-default btn-sm" ng-click="vm.showCourseInfo(course.id, course.name, course.description)">
                             <i class="fa fa-info" aria-hidden="true"></i> View More
                         </button>
                         <a target="_self" href="{{course.filePath}}" download="{{course.fileName}}" title="Download Course Info" class="btn btn-default btn-sm">
@@ -22,11 +22,11 @@
                 <div class="panel-footer container-fluid">
                     <div class="row">
                         <div class="col-md-4 col-xs-4">
-                            <button type="button" class="btn btn-default btn-circle" title="Instructors" uib-popover-template="'instructorPopuptpl.html'" popover-trigger="mouseenter" popover-title="Instructors">
+                            <button type="button" class="btn btn-default btn-circle" title="Instructors" uib-popover-template="'instructorPopuptpl.html'" popover-trigger="mouseenter" popover-title="Instructors" ng-if="course.instructors">
                                 <i class="fa fa-user" aria-hidden="true"></i>
                                 <!--  Instructor -->
                             </button>
-                            <button type="button" class="btn btn-default btn-circle" title="Demo" ng-click="vm.showCourseDemo(course)">
+                            <button type="button" class="btn btn-default btn-circle" title="Demo" ng-if="!course.demoVideo" ng-click="vm.showCourseDemo(course)">
                                 <i class="fa fa-film" aria-hidden="true"></i>
                                 <!--  Demo -->
                             </button>

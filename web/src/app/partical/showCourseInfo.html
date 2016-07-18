@@ -9,6 +9,7 @@
         <h3 class="modal-title" ng-bind="course.courseName"></h3>
     </div>
     <div class="modal-body">
+        <div ng-bind-html="course.courseDesc"></div>
         <uib-accordion close-others="false">
             <uib-accordion-group is-open="unit.isopen" ng-repeat="unit in course.units">
                 <uib-accordion-heading ng-click="unit.isopen = !unit.isopen">

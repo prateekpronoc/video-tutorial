@@ -33,6 +33,12 @@
         };
         vm.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
         vm.format = 'dd-MMMM-yyyy';
+        vm.toolBar = [
+            ['h1','h2','h3', 'bold','italics', 'underline'],
+            ['ol', 'ul'],
+            ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+            ['html', 'insertImage', 'insertLink', 'insertVideo']
+        ];
 
         vm.getAllCourses = getAllCourses;
         vm.subscribeCourse = subscribeCourse;
@@ -192,11 +198,13 @@
                     courseId: courseId
                 };
                 $http.post(CommonInfo.getAppUrl() + '/api/unit/byCourse', data).then(function(response) {
-                    if (response && response.data) {
+                    if (response && response.data && response.data.units.length > 0) {
                         vm.units = response.data.units;
                         selectLesson(vm.units[0].lessons[0]);
                         if (navigateToPage)
                             $state.go('main.myLessons');
+                    } else {
+                        growl.info('No units present in this course');
                     }
                 }, function(response) {
 
@@ -319,6 +327,8 @@
                 response = response.data;
                 if (response && !response.Error) {
                     growl.success('Course Updated successfully');
+                    $state.go('main.courses');
+                    getAllCourses();
                 }
             }, function(resp) {
                 console.log('Error status: ' + resp.status);
@@ -359,7 +369,6 @@
                 }
             }, function(response) {});
 
-
             if (mode == 'edit') {
                 $state.go('main.editLesson');
             } else if (mode == 'insert') {
@@ -388,6 +397,8 @@
                 response = response.data;
                 if (response && !response.Error) {
                     growl.success('Lesson Updated successfully');
+                    $state.go('main.lessons');
+                    getAllLessons();
                 }
             }, function(resp) {
                 console.log('Error status: ' + resp.status);
@@ -494,6 +505,20 @@
             }
         }
 
+        function deleteUser(user) {
+            if (course && confirm('Are you sure you want to delete ' + user.name)) {
+                var data = {
+                    user: user
+                };
+                data.course.isDeleted = true;
+                $http.post(CommonInfo.getAppUrl() + '/api/user', data).then(function(response) {
+                    if (response && response.data && !response.data.Error) {
+                        growl.success('Course deleted successfully');
+                    }
+                }, function(response) {});
+            }
+        }
+
         function signout() {
             CommonInfo.reset();
             $state.go('login');
@@ -523,7 +548,7 @@
             });
         }
 
-        function showCourseInfo(courseId, courseName) {
+        function showCourseInfo(courseId, courseName, courseDesc) {
             if (courseId) {
                 var data = {
                     courseId: courseId
@@ -532,6 +557,7 @@
                     if (response && response.data && response.data.units && response.data.units.length > 0) {
                         var item = {
                             courseName: courseName,
+                            courseDesc: courseDesc,
                             units: response.data.units
                         };
                         var modalInstance = $uibModal.open({

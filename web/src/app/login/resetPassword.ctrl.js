@@ -32,7 +32,7 @@
                 $http.post(CommonInfo.getAppUrl() + "/api/reset", data).then(
                     function(response) {
                         if (response && response.data && !response.data.Error) {
-                            growl.info('Password change successfuly');
+                            growl.info('Password changed successfully');
                             $state.go('login');
                         } else if (response && response.data && response.data.Error) {
                             growl.info(response.data.Message);

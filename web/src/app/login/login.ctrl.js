@@ -108,7 +108,7 @@
                 $http.post(CommonInfo.getAppUrl() + "/api/forget", vm.forget).then(
                     function(response) {
                         if (response && response.data && !response.data.Error) {
-                            growl.success('mail send');
+                            growl.success('Check your email for password reset link');
                         } else if (response && response.data && response.data.Error) {
                             growl.info(response.data.Message);
                         }
