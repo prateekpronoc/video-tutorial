@@ -11,13 +11,29 @@ var fs = require('fs');
 //     self.handleRoutes(router, connection, md5, jwt, imgUpload, fileUpload);
 // }
 
-function REST_ROUTER(router, pool, md5, jwt, imgUpload, fileUpload) {
+function REST_ROUTER(router, pool, md5, jwt, imgUpload, fileUpload, database) {
     var self = this;
-    self.handleRoutes(router, pool, md5, jwt, imgUpload, fileUpload);
+    console.log('database', database);
+    self.handleRoutes(router, pool, md5, jwt, imgUpload, fileUpload, database);
 }
 
 // REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgUpload, fileUpload) {
-REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload, fileUpload) {
+REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload, fileUpload, database) {
+
+    router.get('/all-user', (req, res) => {
+        console.log('database', database.user);
+        database.user.findAndCountAll().then(function(usr) {
+            console.log(usr);
+            res.send({ test: usr.rows });
+        })
+        
+        // database.user.all().then((usrs) => {
+        //     res.users = usrs;
+        // });
+    });
+    // router.get('/all-users'){
+
+    // }
     queryHelper.initdictionaries(pool);
     router.get("/", function(req, res) { /// base route not for use
         res.json({ "Message": "Hello World!" });

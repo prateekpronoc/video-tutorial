@@ -12,6 +12,25 @@ var multiparty = require('connect-multiparty'),
     imgUpload = multiparty({ uploadDir: './public/imagesPath' }),
     fileUpload = multiparty({ uploadDir: './public/filesPath' }),
     port = 8080;
+var _ = require('lodash');
+var dbStructure = require('./dbstructure.json');
+var convertToSequelizeType = require('./utils/convert-to-sequlize-defination.js')
+    //loading the database structure
+var Sequelize = require('sequelize');
+var sequelize = new Sequelize('tutorialsdb', 'root', 'data', { define: { timestamps: false }, host: 'localhost', port: '3306', dialect: 'mysql', omitNull: true });
+_.forOwn(dbStructure.tables, (structure, name) => {
+    var def = convertToSequelizeType(structure, _);
+    sequelize[dbStructure.entities[name]] = sequelize.define(dbStructure.entities[name], def, {
+        talbeName: name,
+        underscored: true,
+        freezeTableName: true
+    })
+});
+
+//Load the db relationship
+_.forEach(dbStructure.relations, function(rel) {
+    sequelize[rel.src][rel.rel](sequelize[rel.trgl, rel.relation]);
+})
 
 function Apis() {
     var self = this;
@@ -41,7 +60,7 @@ Apis.prototype.configureExpress = function(pool) {
     var router = express.Router();
     app.use('/api', router);
     // var rest_router = new rest(router, connection, md5, jwt, imgUpload, fileUpload);
-    var rest_router = new rest(router, pool, md5, jwt, imgUpload, fileUpload);
+    var rest_router = new rest(router, pool, md5, jwt, imgUpload, fileUpload, sequelize);
     self.startServer();
 }
 

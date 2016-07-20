@@ -1,0 +1,1 @@
+{"int(6) unsigned":"unsignedint","varchar(100)":"string","int(10)":"integer","varchar(45)":"string","varchar(500)":"text","int(10) unsigned":"unsignedint","varchar(255)":"string","tinyint(1)":"boolean","timestamp":"timestamp","int(100) unsigned":"unsignedint","varchar(200)":"string","int(70)":"integer"}
