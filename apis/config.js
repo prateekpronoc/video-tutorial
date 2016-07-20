@@ -1,5 +1,6 @@
 module.exports = {
     'secret': 'stallerpvtltd',
+    'port': 8080,
     'database': {
         connectionLimit: 100,
         host: 'localhost',

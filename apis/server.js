@@ -10,7 +10,8 @@ var rest = require("./REST.js");
 var app = express();
 var multiparty = require('connect-multiparty'),
     imgUpload = multiparty({ uploadDir: './public/imagesPath' }),
-    fileUpload = multiparty({ uploadDir: './public/filesPath' });
+    fileUpload = multiparty({ uploadDir: './public/filesPath' }),
+    port = 8080;
 
 function Apis() {
     var self = this;
@@ -45,7 +46,9 @@ Apis.prototype.configureExpress = function(pool) {
 }
 
 Apis.prototype.startServer = function() {
-    app.listen(3000);
+    app.listen(config.port, function() {
+        console.log('%s listening at %s at port:' + config.port);
+    });
 }
 
 Apis.prototype.stop = function(err) {
