@@ -20,6 +20,7 @@ var Sequelize = require('sequelize');
 var sequelize = new Sequelize('tutorialsdb', 'root', 'data', { define: { timestamps: false }, host: 'localhost', port: '3306', dialect: 'mysql', omitNull: true });
 _.forOwn(dbStructure.tables, (structure, name) => {
     var def = convertToSequelizeType(structure, _);
+    console.log('def', def);
      //console.info('Written all fields to a file~!', dbStructure.entities[name]);
     sequelize[dbStructure.entities[name]] = sequelize.define(dbStructure.entities[name], def, {
         talbeName: name,
@@ -27,7 +28,7 @@ _.forOwn(dbStructure.tables, (structure, name) => {
         freezeTableName: true
     });
 
-    console.info('Written all fields to a file~!', sequelize[dbStructure.entities[name]]);
+    //console.info('Written all fields to a file~!', sequelize[dbStructure.entities[name]]);
 });
 
 //Load the db relationship
