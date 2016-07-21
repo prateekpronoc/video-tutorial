@@ -13,7 +13,7 @@ var fs = require('fs');
 
 function REST_ROUTER(router, pool, md5, jwt, imgUpload, fileUpload, database) {
     var self = this;
-    console.log('database', database);
+//    console.log('database', database);
     self.handleRoutes(router, pool, md5, jwt, imgUpload, fileUpload, database);
 }
 
@@ -21,8 +21,8 @@ function REST_ROUTER(router, pool, md5, jwt, imgUpload, fileUpload, database) {
 REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload, fileUpload, database) {
 
     router.get('/all-user', (req, res) => {
-        console.log('database', database.user);
-        database.user.findAndCountAll().then(function(usr) {
+//        console.log('database', database);
+        database.user.findAll().then(function(usr) {
             console.log(usr);
             res.send({ test: usr.rows });
         })

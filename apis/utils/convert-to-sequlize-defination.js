@@ -27,7 +27,8 @@ module.exports = function() {
             mediumtext: Sequelize.TEXT
         };
     return function(structure, _) {
-        logger.debug(structure);
+        //logger.debug(structure);
+        console.log('structure :'+ structure);
         return _.transform(structure, function(result, type, field) {
             var value = {
                 field: field,

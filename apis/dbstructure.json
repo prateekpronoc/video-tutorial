@@ -14,93 +14,17 @@
         "user": "user"
     },
     "tables": {
-        "categories": {
-            "id": "unsignedint",
-            "name": "string"
-        },
-        "course_subscription": {
-            "id": "unsignedint",
-            "courseId": "integer",
-            "userId": "integer"
-        },
-        "course_unit_lesson_r": {
-            "id": "unsignedint",
-            "courseId": "integer",
-            "unitId": "integer",
-            "lessonId": "integer"
-        },
-        "courses": {
-            "id": "unsignedint",
-            "name": "string",
-            "description": "text",
-            "demoVideo": "string",
-            "validFrom": "integer",
-            "validTo": "integer",
-            "duration": "unsignedint",
-            "color_code": "string",
-            "subscriptionFee": "string",
-            "filePath": "string",
-            "categoryId": "unsignedint",
-            "fileName": "string",
-            "isDeleted": "boolean",
-            "demoPoster": "string"
-        },
-        "courses_instructor": {
-            "id": "unsignedint",
-            "courseId": "integer",
-            "userId": "integer",
-            "isDeleted": "boolean"
-        },
-        "lesson_comments": {
-            "id": "unsignedint",
-            "lessonId": "integer",
-            "comments": "string",
-            "timestamp": "timestamp",
-            "userId": "unsignedint",
-            "isDeleted": "boolean"
-        },
-        "lesson_files": {
-            "id": "unsignedint",
-            "lessonId": "integer",
-            "filePath": "string",
-            "fileName": "string"
-        },
-        "lessons": {
-            "id": "unsignedint",
-            "name": "string",
-            "description": "string",
-            "video": "string",
-            "air_date": "integer",
-            "duration": "unsignedint",
-            "isDeleted": "boolean",
-            "poster": "string"
-        },
-        "payment_details": {
-            "id": "unsignedint",
-            "payment_request_id": "string",
-            "phone": "string",
-            "purpose": "string",
-            "amount": "string",
-            "email": "string",
-            "fullName": "string",
-            "userId": "string",
-            "courseId": "string"
-        },
-        "payment_log": {
-            "id": "unsignedint",
-            "payment_request_id": "string",
-            "payment_id": "string",
-            "fees": "string",
-            "mac": "string",
-            "status": "string"
-        },
-        "units": {
-            "id": "unsignedint",
-            "name": "string",
-            "description": "string",
-            "courseId": "unsignedint",
-            "isDeleted": "boolean"
-        },
+        "categories": { "id": "unsignedint", "name": "string" },
+        "course_subscription": { "id": "unsignedint", "courseId": "integer", "userId": "integer" },
+        "course_unit_lesson_r": { "id": "unsignedint", "courseId": "integer", "unitId": "integer", "lessonId": "integer" },
+        "courses": { "id": "unsignedint", "name": "string", "description": "text", "demoVideo": "string", "validFrom": "integer", "validTo": "integer", "duration": "unsignedint", "color_code": "string", "subscriptionFee": "string", "filePath": "string", "categoryId": "unsignedint", "fileName": "string", "isDeleted": "boolean", "demoPoster": "string" },
+        "courses_instructor": { "id": "unsignedint", "courseId": "integer", "userId": "integer", "isDeleted": "boolean" },
+        "lesson_comments": { "id": "unsignedint", "lessonId": "integer", "comments": "string", "timestamp": "timestamp", "userId": "unsignedint", "isDeleted": "boolean" },
+        "lesson_files": { "id": "unsignedint", "lessonId": "integer", "filePath": "string", "fileName": "string" },
+        "lessons": { "id": "unsignedint", "name": "string", "description": "string", "video": "string", "air_date": "integer", "duration": "unsignedint", "isDeleted": "boolean", "poster": "string" },
+        "payment_details": { "id": "unsignedint", "payment_request_id": "string", "phone": "string", "purpose": "string", "amount": "string", "email": "string", "fullName": "string", "userId": "string", "courseId": "string" },
+        "payment_log": { "id": "unsignedint", "payment_request_id": "string", "payment_id": "string", "fees": "string", "mac": "string", "status": "string" },
+        "units": { "id": "unsignedint", "name": "string", "description": "string", "courseId": "unsignedint", "isDeleted": "boolean" },
         "user": {
             "id": "integer",
             "fullName": "string",
