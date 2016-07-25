@@ -21,13 +21,13 @@
   "maxparams": 6,
   "maxdepth": 4,
   "maxstatements": 30,
-​
-  "maxlen": 120,
+
+  "maxlen": 150,
   "asi": false,
   "boss": false,
   "debug": false,
   "eqnull": false,
-  "esnext": false,
+  "esnext": true,
   "evil": false,
   "expr": false,
   "funcscope": false,
@@ -46,7 +46,7 @@
   "sub": false,
   "supernew": false,
   "validthis": false,
-​
+
   "browser": false,
   "couch": false,
   "devel": true,
@@ -58,12 +58,12 @@
   "prototypejs": false,
   "rhino": false,
   "wsh": false,
-​
+
   "nomen": false,
   "onevar": false,
   "passfail": false,
   "white": false,
-​
+
   "maxerr": 100,
   "globals": {
     "angular": false
