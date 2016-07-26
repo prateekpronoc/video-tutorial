@@ -1,20 +1,16 @@
 'use strict'
 var promise = require('bluebird'),
     server = require('./utils/create-server.js'),
-    svr = server()();
-
+    config = require('./config/my-config.json'),
+    svr = server(config)();
+console.log(config.port);
 var config, server;
 
-process.on('SIGINT', () => {
-    // Do any clean up required
-    console.error('SIGINT Received: ' + process.pid);
-    console.log('SIGINT Received: ' + process.pid);
-    console.log(server);
-    // if (config && config.logger) {
-    //     config.logger.info('SIGINT Received:' + process.pid);
-    // }
-    // shutdown();
-
+process.on('SIGINT', function() {
+    // shuttingDown = true;
+    server.close(function() {
+        process.exit();
+    });
 });
 
 svr.then((svr) => {

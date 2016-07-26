@@ -6,15 +6,20 @@ var cors = require('cors');
 var loadDbObject = require('./load-db-object.js');
 var allRoutes = require('./generate-routes.js');
 var _ = require('lodash');
-module.exports = function() {
-    var server, config = {},
+module.exports = function(config) {
+    console.log(config);
+    var server,
         database, sequelize;
     config.Promise = Promise;
+    let env = process.env;
+    let port = config.port || process.env.PORT || 8080;
+    let ip = env.OPENSHIFT_NODE4_IP || '127.0.0.1';
     return function() {
         return new Promise.try(function() {
             server = express();
-            server.listen(8080, function() {
-                console.log('listing the server at port :8080');
+            server.set('port', config.port || process.env.app_port || 8080);
+            server.listen(port, ip, function() {
+                console.log('listing the server at port ', port);
             });
             return server;
         }).then(function(svr) {
@@ -36,7 +41,7 @@ module.exports = function() {
     function loadDbStructure(svr) {
         database = loadDbObject();
         database.then((dataBase) => {
-           // console.log(dataBase.db)
+            // console.log(dataBase.db)
             sequelize = dataBase.db;
             config.entities = dataBase.entities;
         });
@@ -48,9 +53,9 @@ module.exports = function() {
     }
 
     function createRoutes(svr) {
-        console.log('generating routes');
+        // console.log('generating routes');
         allRoutes(config, _)(sequelize, svr).then(() => {
-            console.log('routes generated');
+            //console.log('routes generated');
         });
         return svr;
     }
@@ -60,7 +65,7 @@ module.exports = function() {
         svr.use(bodyParser.json());
         svr.use(cors());
         svr.use(express.static('public'));
-        console.log('options set');
+        //console.log('options set');
         return svr
     }
 };

@@ -40,7 +40,7 @@ module.exports = function(structure, _) {
             value.autoIncrement = true;
         }
         result[_.camelCase(field)] = value;
-        console.log('result' + result);
+//        console.log('result' + result);
     });
     //return structure;
 
